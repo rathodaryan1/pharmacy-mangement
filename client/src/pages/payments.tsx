@@ -25,7 +25,7 @@ export default function Payments() {
             </div>
             <div>
               <p className="text-muted-foreground text-sm font-medium">Successful Payments</p>
-              <h3 className="text-2xl font-bold text-foreground">$124,500.00</h3>
+              <h3 className="text-2xl font-bold text-foreground">₹124,500.00</h3>
             </div>
           </CardContent>
         </Card>
@@ -36,7 +36,7 @@ export default function Payments() {
             </div>
             <div>
               <p className="text-muted-foreground text-sm font-medium">Pending Processing</p>
-              <h3 className="text-2xl font-bold text-foreground">$12,450.00</h3>
+              <h3 className="text-2xl font-bold text-foreground">₹12,450.00</h3>
             </div>
           </CardContent>
         </Card>
@@ -47,7 +47,7 @@ export default function Payments() {
             </div>
             <div>
               <p className="text-muted-foreground text-sm font-medium">Failed Transactions</p>
-              <h3 className="text-2xl font-bold text-foreground">$840.00</h3>
+              <h3 className="text-2xl font-bold text-foreground">₹840.00</h3>
             </div>
           </CardContent>
         </Card>
@@ -77,7 +77,7 @@ export default function Payments() {
                   <td className="px-6 py-4 font-medium font-mono text-sidebar-background">{payment.transactionId}</td>
                   <td className="px-6 py-4 text-muted-foreground">{payment.paymentDate}</td>
                   <td className="px-6 py-4 font-medium">{payment.customerName}</td>
-                  <td className="px-6 py-4 font-bold">${payment.amount.toFixed(2)}</td>
+                  <td className="px-6 py-4 font-bold">₹{payment.amount.toFixed(2)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <CreditCard className="w-4 h-4" /> {payment.paymentMethod}

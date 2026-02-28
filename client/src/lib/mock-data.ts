@@ -2,10 +2,10 @@
 
 export const kpiData = {
   overview: [
-    { title: "Total Profit", value: "$45,231.89", trend: "+20.1%", isPositive: true },
+    { title: "Total Profit", value: "₹45,231.89", trend: "+20.1%", isPositive: true },
     { title: "Total Customers", value: "2,405", trend: "+15.1%", isPositive: true },
     { title: "Total Orders", value: "12,234", trend: "+4.1%", isPositive: true },
-    { title: "Total Revenue", value: "$89,432.00", trend: "-1.2%", isPositive: false },
+    { title: "Total Revenue", value: "₹89,432.00", trend: "-1.2%", isPositive: false },
   ],
   products: [
     { title: "Total Products", value: "1,204", trend: "+12", isPositive: true },
@@ -21,37 +21,37 @@ export const kpiData = {
 };
 
 export const productsList = [
-  { id: "PRD-001", name: "Amoxicillin 500mg", quantity: 150, price: 12.99, expiryDate: "2025-10-12", status: "in stock", category: "Antibiotics" },
-  { id: "PRD-002", name: "Ibuprofen 400mg", quantity: 24, price: 8.50, expiryDate: "2026-01-15", status: "low stock", category: "Pain Relievers" },
-  { id: "PRD-003", name: "Lisinopril 200mg", quantity: 0, price: 15.00, expiryDate: "2024-11-20", status: "out of stock", category: "Blood Pressure" },
-  { id: "PRD-004", name: "Omeprazole 10mg", quantity: 300, price: 9.99, expiryDate: "2026-05-01", status: "in stock", category: "Blood Pressure" },
-  { id: "PRD-005", name: "Cetirizine 20mg", quantity: 85, price: 14.25, expiryDate: "2025-08-30", status: "in stock", category: "Antacids" },
-  { id: "PRD-006", name: "Metformin 40mg", quantity: 12, price: 11.50, expiryDate: "2025-02-14", status: "low stock", category: "Antacids" },
-  { id: "PRD-007", name: "Azithromycin 250mg", quantity: 210, price: 18.00, expiryDate: "2026-09-09", status: "in stock", category: "Antibiotics" },
+  { id: "PRD-001", name: "Amoxycillin 500mg", quantity: 150, price: 120.99, expiryDate: "2025-10-12", status: "in stock", category: "Antibiotics" },
+  { id: "PRD-002", name: "Combiflam", quantity: 24, price: 45.50, expiryDate: "2026-01-15", status: "low stock", category: "Pain Relievers" },
+  { id: "PRD-003", name: "Amlokind 5mg", quantity: 0, price: 65.00, expiryDate: "2024-11-20", status: "out of stock", category: "Blood Pressure" },
+  { id: "PRD-004", name: "Pantocid 40mg", quantity: 300, price: 110.99, expiryDate: "2026-05-01", status: "in stock", category: "Gastrointestinal" },
+  { id: "PRD-005", name: "Limcee Vitamin C", quantity: 85, price: 25.25, expiryDate: "2025-08-30", status: "in stock", category: "Vitamins" },
+  { id: "PRD-006", name: "Digene Gel", quantity: 12, price: 115.50, expiryDate: "2025-02-14", status: "low stock", category: "Gastrointestinal" },
+  { id: "PRD-007", name: "Azithral 500mg", quantity: 210, price: 118.00, expiryDate: "2026-09-09", status: "in stock", category: "Antibiotics" },
 ];
 
 export const ordersList = [
-  { id: "ORD-7021", customerName: "Sarah Jenkins", orderDate: "2024-03-14", products: ["Amoxicillin", "Ibuprofen"], totalAmount: 21.49, paymentStatus: "Paid", orderStatus: "Completed" },
-  { id: "ORD-7022", customerName: "Michael Chen", orderDate: "2024-03-14", products: ["Lisinopril"], totalAmount: 15.00, paymentStatus: "Pending", orderStatus: "In progress" },
-  { id: "ORD-7023", customerName: "Emma Davis", orderDate: "2024-03-13", products: ["Omeprazole", "Cetirizine"], totalAmount: 24.24, paymentStatus: "Paid", orderStatus: "Completed" },
-  { id: "ORD-7024", customerName: "James Wilson", orderDate: "2024-03-13", products: ["Metformin"], totalAmount: 11.50, paymentStatus: "Failed", orderStatus: "Cancelled" },
-  { id: "ORD-7025", customerName: "Robert Taylor", orderDate: "2024-03-12", products: ["Azithromycin"], totalAmount: 18.00, paymentStatus: "Paid", orderStatus: "Completed" },
-  { id: "ORD-7026", customerName: "Linda Anderson", orderDate: "2024-03-12", products: ["Ibuprofen", "Cetirizine"], totalAmount: 22.75, paymentStatus: "Pending", orderStatus: "Pending" },
+  { id: "ORD-7021", customerName: "Rahul Sharma", orderDate: "2024-03-14", products: ["Amoxycillin", "Combiflam"], totalAmount: 210.49, paymentStatus: "Paid", orderStatus: "Completed" },
+  { id: "ORD-7022", customerName: "Priya Patel", orderDate: "2024-03-14", products: ["Amlokind"], totalAmount: 150.00, paymentStatus: "Pending", orderStatus: "In progress" },
+  { id: "ORD-7023", customerName: "Amit Gupta", orderDate: "2024-03-13", products: ["Pantocid", "Limcee"], totalAmount: 240.24, paymentStatus: "Paid", orderStatus: "Completed" },
+  { id: "ORD-7024", customerName: "Sneha Reddy", orderDate: "2024-03-13", products: ["Digene"], totalAmount: 115.50, paymentStatus: "Failed", orderStatus: "Cancelled" },
+  { id: "ORD-7025", customerName: "Vikram Singh", orderDate: "2024-03-12", products: ["Azithral"], totalAmount: 180.00, paymentStatus: "Paid", orderStatus: "Completed" },
+  { id: "ORD-7026", customerName: "Anjali Verma", orderDate: "2024-03-12", products: ["Combiflam", "Limcee"], totalAmount: 220.75, paymentStatus: "Pending", orderStatus: "Pending" },
 ];
 
 export const customersList = [
-  { id: "CUS-101", name: "Sarah Jenkins", email: "sarah.j@example.com", phone: "+1 (555) 123-4567", ordersPlaced: 12, totalSpend: 345.50, lastOrderDate: "2024-03-14" },
-  { id: "CUS-102", name: "Michael Chen", email: "m.chen@example.com", phone: "+1 (555) 987-6543", ordersPlaced: 4, totalSpend: 120.00, lastOrderDate: "2024-03-14" },
-  { id: "CUS-103", name: "Emma Davis", email: "emma.davis@example.com", phone: "+1 (555) 456-7890", ordersPlaced: 28, totalSpend: 890.25, lastOrderDate: "2024-03-13" },
-  { id: "CUS-104", name: "James Wilson", email: "jwilson88@example.com", phone: "+1 (555) 222-3333", ordersPlaced: 1, totalSpend: 11.50, lastOrderDate: "2024-03-13" },
-  { id: "CUS-105", name: "Robert Taylor", email: "rtaylor@example.com", phone: "+1 (555) 444-5555", ordersPlaced: 15, totalSpend: 450.75, lastOrderDate: "2024-03-12" },
+  { id: "CUS-101", name: "Rahul Sharma", email: "rahul.s@example.in", phone: "+91 98765 43210", ordersPlaced: 12, totalSpend: 3450.50, lastOrderDate: "2024-03-14" },
+  { id: "CUS-102", name: "Priya Patel", email: "priya.p@example.in", phone: "+91 91234 56789", ordersPlaced: 4, totalSpend: 1200.00, lastOrderDate: "2024-03-14" },
+  { id: "CUS-103", name: "Amit Gupta", email: "amit.g@example.in", phone: "+91 99887 76655", ordersPlaced: 28, totalSpend: 8900.25, lastOrderDate: "2024-03-13" },
+  { id: "CUS-104", name: "Sneha Reddy", email: "sneha.r@example.in", phone: "+91 90000 11111", ordersPlaced: 1, totalSpend: 115.50, lastOrderDate: "2024-03-13" },
+  { id: "CUS-105", name: "Vikram Singh", email: "vikram.s@example.in", phone: "+91 92222 33333", ordersPlaced: 15, totalSpend: 4500.75, lastOrderDate: "2024-03-12" },
 ];
 
 export const paymentsList = [
-  { transactionId: "TXN-9910", customerName: "Sarah Jenkins", paymentDate: "2024-03-14 10:23 AM", amount: 21.49, status: "Completed", paymentMethod: "Credit Card", orderId: "ORD-7021" },
-  { transactionId: "TXN-9911", customerName: "Michael Chen", paymentDate: "2024-03-14 11:45 AM", amount: 15.00, status: "Pending", paymentMethod: "PayPal", orderId: "ORD-7022" },
-  { transactionId: "TXN-9912", customerName: "Emma Davis", paymentDate: "2024-03-13 09:12 AM", amount: 24.24, status: "Completed", paymentMethod: "Credit Card", orderId: "ORD-7023" },
-  { transactionId: "TXN-9913", customerName: "James Wilson", paymentDate: "2024-03-13 02:30 PM", amount: 11.50, status: "Failed", paymentMethod: "Bank Transfer", orderId: "ORD-7024" },
+  { transactionId: "TXN-9910", customerName: "Rahul Sharma", paymentDate: "2024-03-14 10:23 AM", amount: 210.49, status: "Completed", paymentMethod: "UPI", orderId: "ORD-7021" },
+  { transactionId: "TXN-9911", customerName: "Priya Patel", paymentDate: "2024-03-14 11:45 AM", amount: 150.00, status: "Pending", paymentMethod: "Net Banking", orderId: "ORD-7022" },
+  { transactionId: "TXN-9912", customerName: "Amit Gupta", paymentDate: "2024-03-13 09:12 AM", amount: 240.24, status: "Completed", paymentMethod: "UPI", orderId: "ORD-7023" },
+  { transactionId: "TXN-9913", customerName: "Sneha Reddy", paymentDate: "2024-03-13 02:30 PM", amount: 115.50, status: "Failed", paymentMethod: "Debit Card", orderId: "ORD-7024" },
 ];
 
 export const salesChartData = [

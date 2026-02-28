@@ -73,7 +73,7 @@ export default function Orders() {
                   <td className="px-6 py-4 font-semibold text-sidebar-background">{order.id}</td>
                   <td className="px-6 py-4 font-medium">{order.customerName}</td>
                   <td className="px-6 py-4 text-muted-foreground">{order.orderDate}</td>
-                  <td className="px-6 py-4 font-bold text-foreground">${order.totalAmount.toFixed(2)}</td>
+                  <td className="px-6 py-4 font-bold text-foreground">₹{order.totalAmount.toFixed(2)}</td>
                   <td className="px-6 py-4">
                     <Badge variant="outline" className={`
                       border-0 

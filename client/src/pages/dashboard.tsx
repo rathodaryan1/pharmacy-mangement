@@ -27,20 +27,20 @@ export default function Dashboard() {
           return (
             <Card key={idx} className="card-container hover-elevate">
               <CardContent className="p-0">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <Badge 
-                    variant="outline" 
-                    className={`rounded-full px-2.5 py-1 ${kpi.isPositive ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-red-50 text-red-600 border-red-200'}`}
-                  >
-                    {kpi.isPositive ? <ArrowUpRight className="w-3 h-3 mr-1" /> : <ArrowDownRight className="w-3 h-3 mr-1" />}
-                    {kpi.trend}
-                  </Badge>
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <Icon className="w-6 h-6" />
                 </div>
-                <p className="text-muted-foreground text-sm font-medium">{kpi.title}</p>
-                <h3 className="text-2xl font-bold text-foreground mt-1">{kpi.value}</h3>
+                <Badge 
+                  variant="outline" 
+                  className={`rounded-full px-2.5 py-1 ${kpi.isPositive ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-red-50 text-red-600 border-red-200'}`}
+                >
+                  {kpi.isPositive ? <ArrowUpRight className="w-3 h-3 mr-1" /> : <ArrowDownRight className="w-3 h-3 mr-1" />}
+                  {kpi.trend}
+                </Badge>
+              </div>
+              <p className="text-muted-foreground text-sm font-medium">{kpi.title}</p>
+              <h3 className="text-2xl font-bold text-foreground mt-1">{kpi.value}</h3>
               </CardContent>
             </Card>
           );
@@ -95,7 +95,7 @@ export default function Dashboard() {
                 <div className="w-full">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="font-semibold text-foreground">{item.name}</span>
-                    <span className="font-bold text-sidebar-background">{item.amount}</span>
+                    <span className="font-bold text-sidebar-background">₹{item.amount.slice(1)}</span>
                   </div>
                   <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
                     <div className="h-full bg-primary rounded-full" style={{ width: `${item.progress}%` }}></div>
@@ -132,7 +132,7 @@ export default function Dashboard() {
                     <td className="px-4 py-4 font-semibold text-foreground">{order.id}</td>
                     <td className="px-4 py-4">{order.customerName}</td>
                     <td className="px-4 py-4 text-muted-foreground">{order.products.join(", ")}</td>
-                    <td className="px-4 py-4 font-semibold">${order.totalAmount.toFixed(2)}</td>
+                    <td className="px-4 py-4 font-semibold">₹{order.totalAmount.toFixed(2)}</td>
                     <td className="px-4 py-4">
                       <Badge variant="outline" className={`
                         border-0
