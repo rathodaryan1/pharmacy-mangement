@@ -1,0 +1,265 @@
+Build a modern Pharmacy Management Dashboard UI inspired by premium SaaS designs like “Pharmly”.
+
+IMPORTANT:
+- UI only (mock data)
+- Fully working front-end (no backend)
+- Next.js App Router
+- shadcn/ui
+- Tailwind CSS
+- TypeScript
+- Responsive (Desktop + Mobile)
+- Clean component structure
+
+====================================================
+GLOBAL DESIGN STYLE
+====================================================
+
+Theme:
+- Soft light gray background (#F5F7F9 style)
+- Deep green sidebar
+- Lime accent buttons
+- Rounded cards (xl radius)
+- Soft shadows
+- Minimal borders
+- Smooth hover transitions
+- Clean SaaS spacing
+
+Primary Colors:
+- Sidebar: dark emerald green
+- Accent: lime green
+- Success: green
+- Warning: yellow
+- Danger: red
+- Neutral cards: white
+
+Typography:
+- Clean sans-serif
+- Bold section headers
+- Medium labels
+- Subtle gray secondary text
+
+====================================================
+LAYOUT STRUCTURE
+====================================================
+
+Sidebar (fixed left):
+Logo top-left
+Menu items:
+- Overview
+- Products
+- Orders
+- Sales
+- Customers
+- Payments
+- Help & Support
+- Settings
+
+Bottom:
+- Upgrade Pro card
+- Logout button
+
+Active item highlighted with lime background pill.
+
+Top Header (content area):
+- Search input (rounded)
+- Notification bell icon
+- User avatar with dropdown
+
+====================================================
+PAGES TO BUILD
+====================================================
+
+1️⃣ OVERVIEW DASHBOARD
+
+Top KPI Cards (4):
+- Total Profit
+- Total Customers
+- Total Orders
+- Total Revenue
+
+Each card:
+- Rounded
+- Small trend badge (+2%)
+- Subtext “Since last week”
+- Icon
+
+Sales Analytics Section:
+- Bar chart
+- Month dropdown filter
+- Animated bars
+- Tooltip on hover
+
+Latest Orders Table:
+Columns:
+- Order ID
+- Medicine Name
+- Price
+- Status
+- Action icons
+
+Top Selling Medicine Widget:
+- Vertical bar graph
+- Price labels under bars
+
+====================================================
+
+2️⃣ PRODUCTS PAGE
+
+Top Summary Cards:
+- Total Products
+- Low Stock Items
+- Out of Stock
+
+Category Cards Grid:
+- Antibiotics
+- Pain Relievers
+- Vitamins
+- etc.
+
+Product Table:
+Columns:
+- Product ID
+- Name
+- Quantity
+- Price
+- Expiry Date
+- Status badge
+- Action icons
+
+Buttons:
+- Add New Product
+- Filter
+- Export
+
+Pagination bottom-right.
+
+====================================================
+
+3️⃣ ORDERS PAGE
+
+Top Cards:
+- Total Orders
+- Completed Orders
+- Pending Orders
+- Cancelled Orders
+
+Orders Table:
+Columns:
+- Order ID
+- Customer Name
+- Order Date
+- Products
+- Total Amount
+- Payment Status
+- Order Status
+- Action
+
+Statuses:
+- Completed (green)
+- Pending (yellow)
+- Failed (red)
+- In Progress (blue)
+
+====================================================
+
+4️⃣ SALES PAGE
+
+Top KPI:
+- Total Revenue
+- Total Profit
+- Total Cost
+- Average Order Value
+
+Revenue Chart
+Orders By Time Heatmap
+Recent Orders Table
+Top Products List
+
+====================================================
+
+5️⃣ CUSTOMERS PAGE
+
+Top Cards:
+- Total Customers
+- New Customers
+- Returning %
+
+Customer Table:
+- Customer ID
+- Name
+- Email
+- Phone
+- Orders
+- Total Spend
+- Last Order Date
+- Action
+
+====================================================
+
+6️⃣ PAYMENTS PAGE
+
+Top Cards:
+- Completed Payments
+- Pending Payments
+- Failed Payments
+
+Payment Table:
+- Transaction ID
+- Customer
+- Date
+- Amount
+- Status
+- Payment Method
+- Order ID
+- Action
+
+====================================================
+
+7️⃣ SETTINGS PAGE
+
+Sections:
+- Appearance (Light/Dark toggle)
+- Language dropdown
+- Two-Factor Authentication toggle
+- Push Notification toggle
+- Email Notification toggle
+
+Bottom Card:
+Notices & Articles section
+
+====================================================
+RESPONSIVE RULES
+====================================================
+
+- Sidebar collapses on mobile
+- Charts resize
+- Tables scroll horizontally
+- Cards stack vertically
+- Maintain spacing consistency
+
+====================================================
+COMPONENT REQUIREMENTS
+====================================================
+
+Use:
+- shadcn Card
+- Badge
+- Button
+- Dropdown
+- Avatar
+- Tabs
+- Data table
+- Modal
+- Toggle switch
+
+Icons: Lucide React
+
+====================================================
+OUTPUT RULES
+====================================================
+
+- Clean reusable components
+- Organized folder structure
+- No backend
+- Mock realistic pharmacy data
+- Professional production-quality UI
