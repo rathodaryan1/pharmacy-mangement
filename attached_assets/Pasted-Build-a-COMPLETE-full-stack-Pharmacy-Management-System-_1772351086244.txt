@@ -1,0 +1,152 @@
+Build a COMPLETE full-stack Pharmacy Management System.
+
+This must NOT be UI-only.
+Every button, action, filter, export, and form must be fully functional and connected to a real backend and database.
+
+==============================
+MANDATORY TECH STACK
+==============================
+
+Frontend:
+- Next.js (App Router)
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+
+Backend:
+- Next.js API routes (or Express if needed)
+- PostgreSQL database
+- Prisma ORM
+
+Authentication:
+- JWT-based authentication
+- Password hashing using bcrypt
+- Role-based access (Admin / Staff)
+
+==============================
+CRITICAL REQUIREMENTS
+==============================
+
+1. No mock data.
+2. All data must be stored in PostgreSQL.
+3. All buttons must call real backend APIs.
+4. All tables must fetch real database data.
+5. All CRUD operations must persist in the database.
+6. All filters and search must query the database.
+7. All exports must generate real files.
+
+==============================
+FEATURE MODULES (FULLY WORKING)
+==============================
+
+1️⃣ AUTH
+- Register
+- Login
+- Logout
+- Protected routes
+- Role middleware
+
+2️⃣ PRODUCTS (Medicines)
+- Add product
+- Edit product
+- Delete product
+- Search products
+- Filter by stock status
+- Pagination from database
+- Stock auto-update
+
+3️⃣ CUSTOMERS
+- Add customer
+- Edit
+- Delete
+- View purchase history
+
+4️⃣ ORDERS / SALES
+- Create order with multiple products
+- Auto-calculate total
+- Update stock automatically
+- Change order status
+- Mark as paid
+- Delete order
+- Store order items in separate table
+
+5️⃣ PAYMENTS
+- Record payment
+- Update order payment status
+- Payment history
+- Filter by status
+
+6️⃣ PURCHASES
+- Add supplier
+- Create purchase order
+- Mark as received (increase stock)
+- Record payment out
+
+7️⃣ DASHBOARD
+- Fetch real statistics from DB:
+  - Total revenue
+  - Total orders
+  - Low stock count
+  - Pending payments
+- Charts must use real DB data
+
+8️⃣ REPORTS
+- Date-based filtering
+- Generate CSV file
+- Generate PDF file
+- Download must generate real files
+
+==============================
+DATABASE MODELS (REQUIRED)
+==============================
+
+User
+Product
+Customer
+Order
+OrderItem
+Payment
+Supplier
+PurchaseOrder
+PurchaseItem
+
+Use Prisma schema properly with relations.
+
+==============================
+EXPORT REQUIREMENTS
+==============================
+
+CSV export:
+- Generate real CSV file from DB query
+
+PDF export:
+- Use a real PDF library
+- Generate real downloadable PDF
+
+==============================
+VALIDATION & SECURITY
+==============================
+
+- Zod validation on API routes
+- bcrypt password hashing
+- JWT middleware
+- Role-based API protection
+- Proper error handling
+- Loading states
+- Toast notifications
+
+==============================
+IMPORTANT
+==============================
+
+- Do NOT use useState for persistence.
+- Do NOT use static arrays.
+- Do NOT simulate backend logic in frontend.
+- Everything must go through API routes and database.
+- Provide setup instructions at the end:
+  - npm install
+  - prisma migrate
+  - environment variables
+  - how to start server
+
+Deliver a production-ready project structure.
