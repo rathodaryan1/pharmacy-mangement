@@ -2,12 +2,43 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Bell, Shield, Palette, Globe, Save } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { apiPut } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export default function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [twoFactor, setTwoFactor] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("theme") === "dark";
+  });
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkMode) {
+      root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -55,7 +86,7 @@ export default function Settings() {
               <Switch checked={twoFactor} onCheckedChange={setTwoFactor} className="data-[state=checked]:bg-primary" />
             </div>
             <div className="border-t border-border/50 pt-6">
-              <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700">
+              <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700" onClick={() => setPasswordOpen(true)}>
                 Change Password
               </Button>
             </div>
@@ -120,11 +151,58 @@ export default function Settings() {
         </Card>
 
         <div className="flex justify-end mt-4">
-          <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl px-8 shadow-lg shadow-primary/25">
+          <Button
+            className="bg-primary hover:bg-primary/90 text-white rounded-xl px-8 shadow-lg shadow-primary/25"
+            disabled={saving}
+            onClick={async () => {
+              setSaving(true);
+              try {
+                await apiPut("/api/me", { name: user?.name });
+                toast({ title: "Saved", description: "Profile updated." });
+              } catch (e) {
+                toast({ title: "Error", description: e instanceof Error ? e.message : "Failed to save", variant: "destructive" });
+              } finally {
+                setSaving(false);
+              }
+            }}
+          >
             <Save className="w-4 h-4 mr-2" /> Save Changes
           </Button>
         </div>
       </div>
+
+      <Dialog open={passwordOpen} onOpenChange={setPasswordOpen}>
+        <DialogContent className="rounded-2xl">
+          <DialogHeader><DialogTitle>Change Password</DialogTitle></DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>New password (min 6 characters)</Label>
+              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" minLength={6} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setPasswordOpen(false); setNewPassword(""); }}>Cancel</Button>
+            <Button
+              onClick={async () => {
+                if (newPassword.length < 6) {
+                  toast({ title: "Error", description: "Password must be at least 6 characters", variant: "destructive" });
+                  return;
+                }
+                try {
+                  await apiPut("/api/me", { password: newPassword });
+                  toast({ title: "Password updated" });
+                  setPasswordOpen(false);
+                  setNewPassword("");
+                } catch (e) {
+                  toast({ title: "Error", description: e instanceof Error ? e.message : "Failed", variant: "destructive" });
+                }
+              }}
+            >
+              Update
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

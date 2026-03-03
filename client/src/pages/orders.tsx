@@ -1,11 +1,240 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Calendar as CalendarIcon, Eye } from "lucide-react";
-import { ordersList, kpiData } from "@/lib/mock-data";
+import { Search, Calendar as CalendarIcon, Eye, Plus, Trash2 } from "lucide-react";
+import { apiGet, apiPost } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+
+type OrderRow = {
+  id: string;
+  customerName: string;
+  orderDate: string;
+  products: string[];
+  totalAmount: number;
+  paymentStatus: string;
+  paymentMethod?: string;
+  orderStatus: string;
+};
+
+type Kpi = { title: string; value: string; trend: string; isPositive: boolean };
+type CustomerOption = { id: string; name: string; email: string; phone?: string | null };
+type ProductOption = {
+  id: string;
+  name: string;
+  batchNumber: string;
+  stock: number;
+  sellingPrice: number;
+};
+
+type PaymentMethod = "CASH" | "UPI" | "CARD" | "BANK" | "PENDING";
+type CreateOrderItem = { productId: string; quantity: number; query: string };
 
 export default function Orders() {
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  const [createOpen, setCreateOpen] = useState(false);
+  const [customerMode, setCustomerMode] = useState<"existing" | "new">("existing");
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [createCustomerId, setCreateCustomerId] = useState("");
+  const [newCustomer, setNewCustomer] = useState({ name: "", email: "", phone: "" });
+  const [showCustomerSuggestions, setShowCustomerSuggestions] = useState(false);
+
+  const [productLookupQuery, setProductLookupQuery] = useState("");
+  const [activeProductRow, setActiveProductRow] = useState<number | null>(null);
+  const [productCatalog, setProductCatalog] = useState<Record<string, ProductOption>>({});
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PENDING");
+  const [createItems, setCreateItems] = useState<CreateOrderItem[]>([{ productId: "", quantity: 1, query: "" }]);
+
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const { data: kpiData, isLoading: kpiLoading } = useQuery({
+    queryKey: ["dashboard", "kpis"],
+    queryFn: () => apiGet<{ orders: Kpi[] }>("/api/dashboard/kpis"),
+  });
+
+  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+    queryKey: ["orders", page, search, statusFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams({ page: String(page), limit: "10" });
+      if (search) params.set("search", search);
+      if (statusFilter && statusFilter !== "All") params.set("status", statusFilter);
+      return apiGet<{ items: OrderRow[]; total: number; totalPages: number }>(`/api/orders?${params}`);
+    },
+  });
+
+  const { data: customersData, isLoading: customersLoading } = useQuery({
+    queryKey: ["customers-options", customerSearch],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (customerSearch.trim()) params.set("search", customerSearch.trim());
+      return apiGet<{ items: CustomerOption[] }>(`/api/customers/options${params.toString() ? `?${params}` : ""}`);
+    },
+    enabled: createOpen && customerMode === "existing",
+  });
+
+  const { data: productsData, isFetching: productsLoading } = useQuery({
+    queryKey: ["products-create-search", productLookupQuery],
+    queryFn: () => apiGet<ProductOption[]>(`/api/products/search?q=${encodeURIComponent(productLookupQuery.trim())}`),
+    enabled: createOpen && productLookupQuery.trim().length >= 2,
+  });
+
+  // Cache searched products locally so selected items remain resolvable after search text changes.
+  useEffect(() => {
+    if (!productsData?.length) return;
+    setProductCatalog((prev) => {
+      const next = { ...prev };
+      for (const product of productsData) next[product.id] = product;
+      return next;
+    });
+  }, [productsData]);
+
+  const searchedProducts = productsData ?? [];
+  const productsById = useMemo(
+    () => new Map(Object.values(productCatalog).map((product) => [product.id, product])),
+    [productCatalog]
+  );
+
+  const detailedItems = useMemo(
+    () =>
+      createItems.map((it) => {
+        const product = productsById.get(it.productId);
+        const unitPrice = product?.sellingPrice ?? 0;
+        const subtotal = unitPrice * it.quantity;
+        return { ...it, product, unitPrice, subtotal };
+      }),
+    [createItems, productsById]
+  );
+
+  const totalAmount = detailedItems.reduce((sum, it) => sum + it.subtotal, 0);
+
+  const getOptionsForRow = (rowQuery: string, selectedProductId: string) => {
+    const q = rowQuery.trim().toLowerCase();
+    const fromCatalog = Object.values(productCatalog).filter((product) => {
+      if (!q) return true;
+      return (
+        product.name.toLowerCase().includes(q) ||
+        product.batchNumber.toLowerCase().includes(q)
+      );
+    });
+
+    const selectedProduct = productsById.get(selectedProductId);
+    const merged = [...fromCatalog, ...searchedProducts];
+    const deduped = Array.from(new Map(merged.map((p) => [p.id, p])).values());
+
+    if (!selectedProduct) return deduped.slice(0, 10);
+    if (deduped.some((p) => p.id === selectedProduct.id)) return deduped.slice(0, 10);
+    return [selectedProduct, ...deduped].slice(0, 10);
+  };
+
+  const resetCreateOrderForm = () => {
+    setCustomerMode("existing");
+    setCustomerSearch("");
+    setCreateCustomerId("");
+    setShowCustomerSuggestions(false);
+    setNewCustomer({ name: "", email: "", phone: "" });
+    setProductLookupQuery("");
+    setActiveProductRow(null);
+    setProductCatalog({});
+    setPaymentMethod("PENDING");
+    setCreateItems([{ productId: "", quantity: 1, query: "" }]);
+  };
+
+  const closeCreateDialog = () => {
+    setCreateOpen(false);
+    resetCreateOrderForm();
+  };
+
+  const createOrderMutation = useMutation({
+    mutationFn: (body: {
+      customerId?: string;
+      customer?: { name: string; email: string; phone?: string };
+      paymentMethod: PaymentMethod;
+      items: Array<{ productId: string; quantity: number }>;
+    }) => apiPost("/api/orders", body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+
+      closeCreateDialog();
+
+      toast({ title: "Order created successfully" });
+    },
+    onError: (e) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const kpis = kpiData?.orders ?? [];
+  const ordersList = ordersData?.items ?? [];
+  const totalPages = ordersData?.totalPages ?? 1;
+
+  const submitCreateOrder = () => {
+    const validItems = createItems
+      .filter((i) => i.productId && i.quantity > 0)
+      .map((i) => ({ productId: i.productId, quantity: i.quantity }));
+
+    if (validItems.length === 0) {
+      toast({ title: "Error", description: "Add at least one valid product item", variant: "destructive" });
+      return;
+    }
+
+    for (const item of validItems) {
+      const product = productsById.get(item.productId);
+      if (!product) {
+        toast({ title: "Error", description: "Some selected products are invalid", variant: "destructive" });
+        return;
+      }
+      if (item.quantity > product.stock) {
+        toast({
+          title: "Error",
+          description: `Insufficient stock for ${product.name}. Available: ${product.stock}`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    if (customerMode === "existing") {
+      if (!createCustomerId) {
+        toast({ title: "Error", description: "Select a customer", variant: "destructive" });
+        return;
+      }
+      createOrderMutation.mutate({ customerId: createCustomerId, items: validItems, paymentMethod });
+      return;
+    }
+
+    if (!newCustomer.name.trim() || !newCustomer.email.trim()) {
+      toast({ title: "Error", description: "Enter new customer name and email", variant: "destructive" });
+      return;
+    }
+
+    createOrderMutation.mutate({
+      customer: {
+        name: newCustomer.name.trim(),
+        email: newCustomer.email.trim(),
+        phone: newCustomer.phone.trim() || undefined,
+      },
+      items: validItems,
+      paymentMethod,
+    });
+  };
+
   return (
     <>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -13,22 +242,27 @@ export default function Orders() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Orders</h1>
           <p className="text-muted-foreground mt-1">Manage and track customer orders.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl shadow-lg shadow-primary/25">
+        <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl shadow-lg shadow-primary/25" onClick={() => setCreateOpen(true)}>
           Create Order
         </Button>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpiData.orders.map((kpi, idx) => (
-          <Card key={idx} className="card-container p-5 hover-elevate">
-            <p className="text-muted-foreground text-sm font-medium mb-2">{kpi.title}</p>
-            <h3 className="text-3xl font-bold text-foreground mb-1">{kpi.value}</h3>
-            <p className={`text-xs font-medium ${kpi.isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-              {kpi.trend} from last month
-            </p>
-          </Card>
-        ))}
+        {kpiLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="card-container p-5 hover-elevate"><Skeleton className="h-20 w-full" /></Card>
+          ))
+        ) : (
+          kpis.map((kpi, idx) => (
+            <Card key={idx} className="card-container p-5 hover-elevate">
+              <p className="text-muted-foreground text-sm font-medium mb-2">{kpi.title}</p>
+              <h3 className="text-3xl font-bold text-foreground mb-1">{kpi.value}</h3>
+              <p className={`text-xs font-medium ${kpi.isPositive ? "text-emerald-600" : "text-red-500"}`}>
+                {kpi.trend} from last month
+              </p>
+            </Card>
+          ))
+        )}
       </div>
 
       <Card className="card-container p-0 overflow-hidden">
@@ -36,9 +270,11 @@ export default function Orders() {
           <div className="flex gap-4 w-full sm:w-auto">
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search orders..." 
+              <Input
+                placeholder="Search orders..."
                 className="pl-10 bg-background border-border/50 rounded-xl"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
             <Button variant="outline" className="rounded-xl border-border/50 px-3">
@@ -46,14 +282,19 @@ export default function Orders() {
             </Button>
           </div>
           <div className="flex gap-2">
-            {['All', 'Completed', 'Pending', 'Cancelled'].map(status => (
-              <Button key={status} variant={status === 'All' ? 'default' : 'outline'} className={`rounded-xl ${status === 'All' ? 'bg-sidebar-background text-white shadow-md' : 'border-border/50 text-muted-foreground'}`}>
+            {["All", "Completed", "Pending", "Cancelled"].map((status) => (
+              <Button
+                key={status}
+                variant={status === statusFilter ? "default" : "outline"}
+                className={`rounded-xl ${status === statusFilter ? "bg-sidebar-background text-white shadow-md" : "border-border/50 text-muted-foreground"}`}
+                onClick={() => setStatusFilter(status)}
+              >
                 {status}
               </Button>
             ))}
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-muted-foreground uppercase bg-background">
@@ -68,44 +309,318 @@ export default function Orders() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50 bg-white">
-              {ordersList.map((order) => (
-                <tr key={order.id} className="hover:bg-muted/20 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-sidebar-background">{order.id}</td>
-                  <td className="px-6 py-4 font-medium">{order.customerName}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{order.orderDate}</td>
-                  <td className="px-6 py-4 font-bold text-foreground">₹{order.totalAmount.toFixed(2)}</td>
-                  <td className="px-6 py-4">
-                    <Badge variant="outline" className={`
-                      border-0 
-                      ${order.paymentStatus === 'Paid' ? 'bg-emerald-50 text-emerald-700' : ''}
-                      ${order.paymentStatus === 'Pending' ? 'bg-amber-50 text-amber-700' : ''}
-                      ${order.paymentStatus === 'Failed' ? 'bg-red-50 text-red-700' : ''}
-                    `}>
-                      {order.paymentStatus}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge variant="outline" className={`
-                      border-0
-                      ${order.orderStatus === 'Completed' ? 'bg-emerald-100 text-emerald-700' : ''}
-                      ${order.orderStatus === 'Pending' ? 'bg-amber-100 text-amber-700' : ''}
-                      ${order.orderStatus === 'In progress' ? 'bg-blue-100 text-blue-700' : ''}
-                      ${order.orderStatus === 'Cancelled' ? 'bg-red-100 text-red-700' : ''}
-                    `}>
-                      {order.orderStatus}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <Button variant="ghost" size="sm" className="rounded-lg hover:bg-primary/10 hover:text-primary text-muted-foreground">
-                      <Eye className="w-4 h-4 mr-2" /> View
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {ordersLoading ? (
+                <tr><td colSpan={7} className="px-6 py-8"><Skeleton className="h-8 w-full" /></td></tr>
+              ) : (
+                ordersList.map((order) => (
+                  <tr key={order.id} className="hover:bg-muted/20 transition-colors">
+                    <td className="px-6 py-4 font-semibold text-sidebar-background">{order.id}</td>
+                    <td className="px-6 py-4 font-medium">{order.customerName}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{order.orderDate}</td>
+                    <td className="px-6 py-4 font-bold text-foreground">Rs {order.totalAmount?.toFixed(2) ?? "0.00"}</td>
+                    <td className="px-6 py-4">
+                      <Badge variant="outline" className={`
+                        border-0
+                        ${order.paymentStatus === "PAID" ? "bg-emerald-50 text-emerald-700" : ""}
+                        ${order.paymentStatus === "PENDING" ? "bg-amber-50 text-amber-700" : ""}
+                        ${order.paymentStatus === "FAILED" ? "bg-red-50 text-red-700" : ""}
+                      `}>
+                        {order.paymentStatus}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge variant="outline" className={`
+                        border-0
+                        ${order.orderStatus === "COMPLETED" ? "bg-emerald-100 text-emerald-700" : ""}
+                        ${order.orderStatus === "PENDING" ? "bg-amber-100 text-amber-700" : ""}
+                        ${order.orderStatus === "IN_PROGRESS" ? "bg-blue-100 text-blue-700" : ""}
+                        ${order.orderStatus === "CANCELLED" ? "bg-red-100 text-red-700" : ""}
+                      `}>
+                        {order.orderStatus?.replace("_", " ") ?? order.orderStatus}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-lg hover:bg-primary/10 hover:text-primary text-muted-foreground"
+                        onClick={() =>
+                          apiGet(`/api/orders/${order.id}`).then((o: unknown) =>
+                            toast({ title: "Order", description: JSON.stringify((o as { totalAmount?: number })?.totalAmount ?? o) })
+                          )
+                        }
+                      >
+                        <Eye className="w-4 h-4 mr-2" /> View
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </Card>
+
+      <Dialog
+        open={createOpen}
+        onOpenChange={(open) => {
+          setCreateOpen(open);
+          if (!open) resetCreateOrderForm();
+        }}
+      >
+        <DialogContent className="rounded-2xl max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Create Order</DialogTitle>
+          </DialogHeader>
+
+          <div className="grid gap-5 py-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <Card className="p-3 border-border/60 bg-muted/20">
+                <p className="text-xs text-muted-foreground">Items</p>
+                <p className="text-xl font-semibold">{createItems.length}</p>
+              </Card>
+              <Card className="p-3 border-border/60 bg-muted/20">
+                <p className="text-xs text-muted-foreground">Payment Status</p>
+                <p className="text-xl font-semibold">{paymentMethod === "PENDING" ? "PENDING" : "PAID"}</p>
+              </Card>
+              <Card className="p-3 border-border/60 bg-muted/20">
+                <p className="text-xs text-muted-foreground">Total Amount</p>
+                <p className="text-xl font-semibold">Rs {totalAmount.toFixed(2)}</p>
+              </Card>
+            </div>
+
+            <div className="space-y-3 rounded-xl border border-border/60 p-4">
+              <Label className="text-sm font-semibold">Customer</Label>
+              <div className="flex gap-2">
+                <Button type="button" variant={customerMode === "existing" ? "default" : "outline"} onClick={() => setCustomerMode("existing")}>
+                  Existing
+                </Button>
+                <Button type="button" variant={customerMode === "new" ? "default" : "outline"} onClick={() => setCustomerMode("new")}>
+                  New Customer
+                </Button>
+              </div>
+
+              {customerMode === "existing" ? (
+                <div className="grid gap-2 relative">
+                  <Input
+                    placeholder="Type customer name/email/phone"
+                    value={customerSearch}
+                    onFocus={() => setShowCustomerSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowCustomerSuggestions(false), 120)}
+                    onChange={(e) => {
+                      setCustomerSearch(e.target.value);
+                      setCreateCustomerId("");
+                    }}
+                  />
+                  {showCustomerSuggestions && (
+                    <div className="absolute top-full z-30 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-border bg-background shadow-md">
+                      {(customersData?.items ?? []).length === 0 ? (
+                        <div className="px-3 py-2 text-xs text-muted-foreground">
+                          {customersLoading ? "Loading customers..." : "No customer found"}
+                        </div>
+                      ) : (
+                        (customersData?.items ?? []).map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            className="w-full text-left px-3 py-2 hover:bg-muted/50"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setCreateCustomerId(c.id);
+                              setCustomerSearch(`${c.name} | ${c.email}${c.phone ? ` | ${c.phone}` : ""}`);
+                              setShowCustomerSuggestions(false);
+                            }}
+                          >
+                            <div className="text-sm font-medium">{c.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {c.email}
+                              {c.phone ? ` | ${c.phone}` : ""}
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                  {createCustomerId && (
+                    <p className="text-xs text-emerald-600">Customer selected</p>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <Input
+                    placeholder="Customer name"
+                    value={newCustomer.name}
+                    onChange={(e) => setNewCustomer((v) => ({ ...v, name: e.target.value }))}
+                  />
+                  <Input
+                    placeholder="Customer email"
+                    type="email"
+                    value={newCustomer.email}
+                    onChange={(e) => setNewCustomer((v) => ({ ...v, email: e.target.value }))}
+                  />
+                  <Input
+                    placeholder="Customer phone (optional)"
+                    value={newCustomer.phone}
+                    onChange={(e) => setNewCustomer((v) => ({ ...v, phone: e.target.value }))}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3 rounded-xl border border-border/60 p-4">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div>
+                  <Label className="text-sm font-semibold">Products</Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Start typing medicine name in each row. A dropdown will appear automatically.
+                  </p>
+                </div>
+              </div>
+
+              {createItems.map((item, idx) => {
+                const selectedProduct = productsById.get(item.productId);
+                const unitPrice = selectedProduct?.sellingPrice ?? 0;
+                const subtotal = unitPrice * item.quantity;
+                const outOfStock = !!selectedProduct && item.quantity > selectedProduct.stock;
+                const rowOptions = getOptionsForRow(item.query, item.productId);
+                const showRowSuggestions = activeProductRow === idx && item.query.trim().length >= 2;
+
+                return (
+                  <Card key={idx} className="p-3 border-border/60 bg-muted/10">
+                    <div className="grid grid-cols-12 gap-2 items-start">
+                      <div className="col-span-12 md:col-span-6 relative">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            className="pl-9"
+                            placeholder="Type medicine name (e.g., azithro)"
+                            value={item.query}
+                            onFocus={() => setActiveProductRow(idx)}
+                            onBlur={() => setTimeout(() => setActiveProductRow((prev) => (prev === idx ? null : prev)), 120)}
+                            onChange={(e) => {
+                              const query = e.target.value;
+                              setCreateItems((prev) =>
+                                prev.map((it, i) => (i === idx ? { ...it, query, productId: "" } : it))
+                              );
+                              setProductLookupQuery(query);
+                              setActiveProductRow(idx);
+                            }}
+                          />
+                        </div>
+                        {showRowSuggestions && (
+                          <div className="absolute top-full z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-background shadow-md">
+                            {item.query.trim().length < 2 ? (
+                              <div className="px-3 py-2 text-xs text-muted-foreground">Type at least 2 characters</div>
+                            ) : productsLoading ? (
+                              <div className="px-3 py-2 text-xs text-muted-foreground">Loading products...</div>
+                            ) : rowOptions.length === 0 ? (
+                              <div className="px-3 py-2 text-xs text-muted-foreground">No matching medicines found</div>
+                            ) : (
+                              rowOptions.map((p) => (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  className="w-full text-left px-3 py-2 hover:bg-muted/50"
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    setCreateItems((prev) =>
+                                      prev.map((it, i) =>
+                                        i === idx
+                                          ? { ...it, productId: p.id, query: `${p.name} ${p.batchNumber}` }
+                                          : it
+                                      )
+                                    );
+                                    setActiveProductRow(null);
+                                  }}
+                                >
+                                  <div className="text-sm font-medium">{p.name}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    Batch: {p.batchNumber} | Stock: {p.stock} | Rs {p.sellingPrice}
+                                  </div>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <Input
+                        className="col-span-4 md:col-span-2"
+                        type="number"
+                        min={1}
+                        value={item.quantity}
+                        onChange={(e) => {
+                          const quantity = parseInt(e.target.value, 10) || 1;
+                          setCreateItems((prev) => prev.map((it, i) => (i === idx ? { ...it, quantity } : it)));
+                        }}
+                      />
+
+                      <div className="col-span-6 md:col-span-3 text-xs text-muted-foreground">
+                        <div className="font-semibold text-foreground">Rs {subtotal.toFixed(2)}</div>
+                        {selectedProduct && <div>Stock: {selectedProduct.stock}</div>}
+                        {outOfStock && <div className="text-red-600">Insufficient stock</div>}
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="col-span-2 md:col-span-1"
+                        disabled={createItems.length === 1}
+                        onClick={() => setCreateItems((prev) => prev.filter((_, i) => i !== idx))}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" /> Remove
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCreateItems((prev) => [...prev, { productId: "", quantity: 1, query: "" }])}
+              >
+                <Plus className="w-4 h-4 mr-1" /> Add Product Row
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 rounded-xl border border-border/60 p-4">
+                <Label>Payment Method</Label>
+                <select
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2"
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                >
+                  <option value="PENDING">Pending</option>
+                  <option value="CASH">Cash</option>
+                  <option value="UPI">UPI</option>
+                  <option value="CARD">Card</option>
+                  <option value="BANK">Bank</option>
+                </select>
+                <p className="text-xs text-muted-foreground">Payment status will be {paymentMethod === "PENDING" ? "PENDING" : "PAID"}.</p>
+              </div>
+
+              <div className="space-y-2 rounded-xl border border-border/60 p-4">
+                <Label>Order Summary</Label>
+                <div className="text-sm text-muted-foreground">Valid line items: {detailedItems.filter((item) => item.productId).length}</div>
+                <div className="rounded-lg border bg-muted/30 px-3 py-2 font-semibold">Rs {totalAmount.toFixed(2)}</div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={closeCreateDialog}>
+              Cancel
+            </Button>
+            <Button onClick={submitCreateOrder} disabled={createOrderMutation.isPending}>
+              {createOrderMutation.isPending ? "Creating..." : "Create Order"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

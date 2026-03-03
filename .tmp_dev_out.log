@@ -1,0 +1,300 @@
+
+> rest-express@1.0.0 dev
+> cross-env NODE_ENV=development tsx server/index.ts
+
+3:22:12 PM [express] serving on http://127.0.0.1:5000
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."role"::text, "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+3:22:17 PM [express] GET /api/me 304 in 2893ms :: {"id":"cmmac227z0000wcrkexqaynzr","name":"Aryan Rathod","email":"aaryan.b.rathod99@gmail.com","role":"STAFF","createdAt":"2026-03-03T08:15:34.845Z"}
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Product"."id", "public"."Product"."name", "public"."Product"."batchNumber", "public"."Product"."stock", "public"."Product"."purchasePrice", "public"."Product"."sellingPrice", "public"."Product"."expiryDate", "public"."Product"."createdAt" FROM "public"."Product" WHERE 1=1 ORDER BY "public"."Product"."createdAt" DESC LIMIT $1 OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE "public"."Product"."stock" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."orderStatus" = CAST($1::text AS "public"."OrderStatus") OFFSET $2) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE ("public"."Product"."stock" > $1 AND "public"."Product"."stock" <= $2) OFFSET $3) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT "public"."Product"."id", "public"."Product"."name" FROM "public"."Product" WHERE 1=1 OFFSET $1
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."orderStatus" = CAST($1::text AS "public"."OrderStatus") OFFSET $2) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE ("public"."Order"."paymentStatus" = CAST($1::text AS "public"."PaymentStatus") AND "public"."Order"."orderStatus" <> CAST($2::text AS "public"."OrderStatus")) OFFSET $3) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Customer"."id" FROM "public"."Customer" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT SUM("totalAmount") AS "_sum$totalAmount" FROM (SELECT "public"."Order"."totalAmount" FROM "public"."Order" WHERE ("public"."Order"."paymentStatus" = CAST($1::text AS "public"."PaymentStatus") AND "public"."Order"."orderStatus" <> CAST($2::text AS "public"."OrderStatus")) OFFSET $3) AS "sub"
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+3:22:20 PM [express] GET /api/products 304 in 2745ms :: {"items":[{"id":"cmmae8vc60001wc4sicmm3d4n","name":"Amoxicillin 500mg","category":"Antibiotics","batchNumber":"FLOW2-1772529406275","stock":6,"purchasePrice":20,"sellingPrice":30,"expiryDate":"2027-01-01","status":"low stock","createdAt":"2026-03-03T09:16:51.751Z"},{"id":"cmmae65op0001wce07i29p9cq","name":"Amoxicillin 500mg","category":"Antibiotics","batchNumber":"FLOW-1772529280682","stock":10,"purchasePrice":20,"sellingPrice":30,"expiryDate":"2027-01-01","status":"low stock","createdAt":"2026-03-03T09:14:45.194Z"},{"id":"cmmaddor60000wc8gebtfycmc","name":"as","category":"Uncategorized","batchNumber":"sad","stock":12,"purchasePrice":12,"sellingPrice":14,"expiryDate":"2026-05-24","status":"low stock","createdAt":"2026-03-03T08:52:36.619Z"},{"id":"cmmad927n0003wclwjgxzajb2","name":"Amoxicillin 500mg","category":"Antibiotics","batchNumber":"CAT-1772527741034","stock":9,"purchasePrice":10,"sellingPrice":12,"expiryDate":"2027-01-01","status":"low stock","createdAt":"2026-03-03T08:49:01.043Z"},{"id":"cmmacwdp70004wcrkq2xlqm55","name":"as","category":"Uncategorized","batchNumber":"sad","stock":12222,"purchasePrice":12,"sellingPrice":235,"expiryDate":"2025-05-15","status":"in stock","createdAt":"2026-03-03T08:39:09.207Z"}],"total":5,"page":1,"limit":10,"totalPages":1}
+3:22:20 PM [express] GET /api/products/meta/categories 304 in 2741ms :: {"counts":{"All":5,"Antibiotics":3,"Pain Relievers":0,"Blood Pressure":0,"Antacids":0,"Vitamins":0,"First Aid":0,"Uncategorized":2}}
+3:22:20 PM [express] GET /api/dashboard/kpis 304 in 2745ms :: {"overview":[{"title":"Total Profit","value":"₹18.00","trend":"+20.1%","isPositive":true},{"title":"Total Customers","value":"6","trend":"+15.1%","isPositive":true},{"title":"Total Orders","value":"4","trend":"+4.1%","isPositive":true},{"title":"Total Revenue","value":"₹60.00","trend":"-1.2%","isPositive":false}],"products":[{"title":"Total Products","value":"5","trend":"+5","isPositive":true},{"title":"Low Stock Items","value":"4","trend":"-4","isPositive":true},{"title":"Out of Stock","value":"0","trend":"+0","isPositive":true}],"orders":[{"title":"Total Orders","value":"4","trend":"+4","isPositive":true},{"title":"Completed","value":"0","trend":"+0","isPositive":true},{"title":"Pending Payments","value":"2","trend":"+2","isPositive":false},{"title":"Cancelled","value":"0","trend":"-0","isPositive":true}]}
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."role"::text, "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."User" ("id","name","email","password","role","createdAt") VALUES ($1,$2,$3,$4,CAST($5::text AS "public"."UserRole"),$6) RETURNING "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."role"::text, "public"."User"."createdAt"
+prisma:query COMMIT
+3:22:22 PM [express] POST /api/auth/register 201 in 3954ms :: {"user":{"id":"cmmafiicm0000wcqwfqra0mx7","name":"Rx UI User","email":"rxui_1772531538353@example.com","role":"ADMIN","createdAt":"2026-03-03T09:52:21.094Z"},"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbW1hZmlpY20wMDAwd2Nxd2ZxcmEwbXg3IiwiZW1haWwiOiJyeHVpXzE3NzI1MzE1MzgzNTNAZXhhbXBsZS5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NzI1MzE1NDIsImV4cCI6MTc3MzEzNjM0Mn0.40SldjQMa60VDls7mZivZg9z8Nr42ZeiwX5QuEjZt0M"}
+3:22:26 PM [express] GET /api/rxnorm/search 200 in 4038ms :: {"query":"amoxicillin","count":3,"items":[{"rxcui":"1291987","name":"{4 (amoxicillin 500 MG Oral Capsule) / 2 (clarithromycin 500 MG Oral Tablet) / 2 (omeprazole 20 MG Delayed Release Oral Capsule) } Pack [Omeclamox]","synonym":"Omeclamox-Pak","tty":"BPCK","language":"ENG","suppress":"N","umlscui":""},{"rxcui":"2604802","name":"{84 (amoxicillin 500 MG Oral Capsule) / 28 (vonoprazan 20 MG Oral Tablet) } Pack [Voquezna 14 Day DualPak 20;500]","synonym":"Voquezna 14 Day DualPak 20 MG; 500 MG Pack","tty":"BPCK","language":"ENG","suppress":"N","umlscui":""},{"rxcui":"2604804","name":"{56 (amoxicillin 500 MG Oral Capsule) / 28 (clarithromycin 500 MG Oral Tablet) / 28 (vonoprazan 20 MG Oral Tablet) } Pack [Voquezna 14 Day TriplePak 20;500;500]","synonym":"Voquezna 14 Day TriplePak 20 MG; 500 MG; 500 MG Pack","tty":"BPCK","language":"ENG","suppress":"N","umlscui":""}],"suggestions":["amoxycillin","amoxicillin","ampicillin"]}
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."role"::text, "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+3:23:05 PM [express] GET /api/me 304 in 1522ms :: {"id":"cmmac227z0000wcrkexqaynzr","name":"Aryan Rathod","email":"aaryan.b.rathod99@gmail.com","role":"STAFF","createdAt":"2026-03-03T08:15:34.845Z"}
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Customer"."id", "public"."Customer"."name", "public"."Customer"."email", "public"."Customer"."phone", "public"."Customer"."createdAt" FROM "public"."Customer" WHERE 1=1 ORDER BY "public"."Customer"."createdAt" DESC LIMIT $1 OFFSET $2
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Customer"."id" FROM "public"."Customer" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT "public"."Order"."id", "public"."Order"."createdAt" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 ORDER BY "public"."Order"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query SELECT SUM("totalAmount") AS "_sum$totalAmount" FROM (SELECT "public"."Order"."totalAmount" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query COMMIT
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT SUM("totalAmount") AS "_sum$totalAmount" FROM (SELECT "public"."Order"."totalAmount" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT SUM("totalAmount") AS "_sum$totalAmount" FROM (SELECT "public"."Order"."totalAmount" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT "public"."Order"."id", "public"."Order"."createdAt" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 ORDER BY "public"."Order"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Order"."id", "public"."Order"."createdAt" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 ORDER BY "public"."Order"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Order"."id", "public"."Order"."createdAt" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 ORDER BY "public"."Order"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT SUM("totalAmount") AS "_sum$totalAmount" FROM (SELECT "public"."Order"."totalAmount" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT SUM("totalAmount") AS "_sum$totalAmount" FROM (SELECT "public"."Order"."totalAmount" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE ("public"."Order"."paymentStatus" = CAST($1::text AS "public"."PaymentStatus") AND "public"."Order"."orderStatus" <> CAST($2::text AS "public"."OrderStatus")) OFFSET $3) AS "sub"
+prisma:query COMMIT
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE "public"."Product"."stock" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Customer"."id" FROM "public"."Customer" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query COMMIT
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."orderStatus" = CAST($1::text AS "public"."OrderStatus") OFFSET $2) AS "sub"
+prisma:query DEALLOCATE ALL
+prisma:query SELECT SUM("totalAmount") AS "_sum$totalAmount" FROM (SELECT "public"."Order"."totalAmount" FROM "public"."Order" WHERE ("public"."Order"."paymentStatus" = CAST($1::text AS "public"."PaymentStatus") AND "public"."Order"."orderStatus" <> CAST($2::text AS "public"."OrderStatus")) OFFSET $3) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE ("public"."Product"."stock" > $1 AND "public"."Product"."stock" <= $2) OFFSET $3) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."orderStatus" = CAST($1::text AS "public"."OrderStatus") OFFSET $2) AS "sub"
+prisma:query SELECT "public"."Order"."id", "public"."Order"."customerId", "public"."Order"."totalAmount", "public"."Order"."paymentStatus"::text, "public"."Order"."orderStatus"::text, "public"."Order"."createdAt" FROM "public"."Order" WHERE 1=1 ORDER BY "public"."Order"."createdAt" DESC LIMIT $1 OFFSET $2
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT "public"."Order"."id", "public"."Order"."createdAt" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 ORDER BY "public"."Order"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+3:23:09 PM [express] GET /api/dashboard/kpis 304 in 1969ms :: {"overview":[{"title":"Total Profit","value":"₹18.00","trend":"+20.1%","isPositive":true},{"title":"Total Customers","value":"6","trend":"+15.1%","isPositive":true},{"title":"Total Orders","value":"4","trend":"+4.1%","isPositive":true},{"title":"Total Revenue","value":"₹60.00","trend":"-1.2%","isPositive":false}],"products":[{"title":"Total Products","value":"5","trend":"+5","isPositive":true},{"title":"Low Stock Items","value":"4","trend":"-4","isPositive":true},{"title":"Out of Stock","value":"0","trend":"+0","isPositive":true}],"orders":[{"title":"Total Orders","value":"4","trend":"+4","isPositive":true},{"title":"Completed","value":"0","trend":"+0","isPositive":true},{"title":"Pending Payments","value":"2","trend":"+2","isPositive":false},{"title":"Cancelled","value":"0","trend":"-0","isPositive":true}]}
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query COMMIT
+prisma:query SELECT SUM("totalAmount") AS "_sum$totalAmount" FROM (SELECT "public"."Order"."totalAmount" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT "public"."Order"."id", "public"."Order"."createdAt" FROM "public"."Order" WHERE "public"."Order"."customerId" = $1 ORDER BY "public"."Order"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Customer"."id", "public"."Customer"."name", "public"."Customer"."email", "public"."Customer"."phone", "public"."Customer"."createdAt" FROM "public"."Customer" WHERE "public"."Customer"."id" IN ($1,$2,$3) OFFSET $4
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+3:23:09 PM [express] GET /api/customers 304 in 4379ms :: {"items":[{"id":"cmmaed1iw000dwc4sciasrg2u","name":"Aryan Rathod","email":"afdsa@gmail.com","phone":"7863868011","ordersPlaced":1,"totalSpend":30,"lastOrderDate":"2026-03-03","createdAt":"2026-03-03T09:20:06.168Z"},{"id":"cmmae8x7j0002wc4srssexvji","name":"New Cust","email":"cust2_1772529406275@example.com","phone":"9999999999","ordersPlaced":2,"totalSpend":90,"lastOrderDate":"2026-03-03","createdAt":"2026-03-03T09:16:54.175Z"},{"id":"cmmadeape0001wc8gv4lsve71","name":"Rathod Rekha","email":"aaryan.b.rathod99@gmail.com","phone":"+919316688014","ordersPlaced":0,"totalSpend":0,"lastOrderDate":"","createdAt":"2026-03-03T08:53:05.330Z"},{"id":"cmmacws8s0005wcrkrmx0hzsd","name":"Rathod Rekha","email":"aaryan.b.rathod99@gmail.com","phone":"9316688014","ordersPlaced":0,"totalSpend":0,"lastOrderDate":"","createdAt":"2026-03-03T08:39:28.061Z"},{"id":"cmmacjbwp0003wcrk0s4rwfxl","name":"Rathod Rekha","email":"aaryan.b.rathod99@gmail.com","phone":"+919316688014","ordersPlaced":0,"totalSpend":0,"lastOrderDate":"","createdAt":"2026-03-03T08:29:00.553Z"},{"id":"cmmac42od0002wcrkwk6rkn8h","name":"Rathod Rekha","email":"aaryan.b.rathod99@gmail.com","phone":"9316688014","ordersPlaced":1,"totalSpend":12,"lastOrderDate":"2026-03-03","createdAt":"2026-03-03T08:17:08.551Z"}],"total":6,"page":1,"limit":10,"totalPages":1}
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query SELECT "public"."Payment"."id", "public"."Payment"."method", "public"."Payment"."orderId" FROM "public"."Payment" WHERE "public"."Payment"."orderId" IN ($1,$2,$3,$4) ORDER BY "public"."Payment"."id" ASC OFFSET $5
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."OrderItem"."id", "public"."OrderItem"."orderId", "public"."OrderItem"."productId", "public"."OrderItem"."quantity", "public"."OrderItem"."price" FROM "public"."OrderItem" WHERE "public"."OrderItem"."orderId" IN ($1,$2,$3,$4) OFFSET $5
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT "public"."Product"."id", "public"."Product"."name", "public"."Product"."batchNumber", "public"."Product"."stock", "public"."Product"."purchasePrice", "public"."Product"."sellingPrice", "public"."Product"."expiryDate", "public"."Product"."createdAt" FROM "public"."Product" WHERE 1=1 ORDER BY "public"."Product"."createdAt" DESC LIMIT $1 OFFSET $2
+prisma:query SELECT "public"."Product"."id", "public"."Product"."name" FROM "public"."Product" WHERE 1=1 OFFSET $1
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT SUM("totalAmount") AS "_sum$totalAmount" FROM (SELECT "public"."Order"."totalAmount" FROM "public"."Order" WHERE ("public"."Order"."paymentStatus" = CAST($1::text AS "public"."PaymentStatus") AND "public"."Order"."orderStatus" <> CAST($2::text AS "public"."OrderStatus")) OFFSET $3) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE ("public"."Order"."paymentStatus" = CAST($1::text AS "public"."PaymentStatus") AND "public"."Order"."orderStatus" <> CAST($2::text AS "public"."OrderStatus")) OFFSET $3) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE "public"."Product"."stock" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."orderStatus" = CAST($1::text AS "public"."OrderStatus") OFFSET $2) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Customer"."id" FROM "public"."Customer" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Order"."id" FROM "public"."Order" WHERE "public"."Order"."orderStatus" = CAST($1::text AS "public"."OrderStatus") OFFSET $2) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE ("public"."Product"."stock" > $1 AND "public"."Product"."stock" <= $2) OFFSET $3) AS "sub"
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+3:23:10 PM [express] GET /api/products/meta/categories 304 in 977ms :: {"counts":{"All":5,"Antibiotics":3,"Pain Relievers":0,"Blood Pressure":0,"Antacids":0,"Vitamins":0,"First Aid":0,"Uncategorized":2}}
+3:23:10 PM [express] GET /api/products 304 in 984ms :: {"items":[{"id":"cmmae8vc60001wc4sicmm3d4n","name":"Amoxicillin 500mg","category":"Antibiotics","batchNumber":"FLOW2-1772529406275","stock":6,"purchasePrice":20,"sellingPrice":30,"expiryDate":"2027-01-01","status":"low stock","createdAt":"2026-03-03T09:16:51.751Z"},{"id":"cmmae65op0001wce07i29p9cq","name":"Amoxicillin 500mg","category":"Antibiotics","batchNumber":"FLOW-1772529280682","stock":10,"purchasePrice":20,"sellingPrice":30,"expiryDate":"2027-01-01","status":"low stock","createdAt":"2026-03-03T09:14:45.194Z"},{"id":"cmmaddor60000wc8gebtfycmc","name":"as","category":"Uncategorized","batchNumber":"sad","stock":12,"purchasePrice":12,"sellingPrice":14,"expiryDate":"2026-05-24","status":"low stock","createdAt":"2026-03-03T08:52:36.619Z"},{"id":"cmmad927n0003wclwjgxzajb2","name":"Amoxicillin 500mg","category":"Antibiotics","batchNumber":"CAT-1772527741034","stock":9,"purchasePrice":10,"sellingPrice":12,"expiryDate":"2027-01-01","status":"low stock","createdAt":"2026-03-03T08:49:01.043Z"},{"id":"cmmacwdp70004wcrkq2xlqm55","name":"as","category":"Uncategorized","batchNumber":"sad","stock":12222,"purchasePrice":12,"sellingPrice":235,"expiryDate":"2025-05-15","status":"in stock","createdAt":"2026-03-03T08:39:09.207Z"}],"total":5,"page":1,"limit":10,"totalPages":1}
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query COMMIT
+3:23:10 PM [express] GET /api/dashboard/kpis 304 in 1003ms :: {"overview":[{"title":"Total Profit","value":"₹18.00","trend":"+20.1%","isPositive":true},{"title":"Total Customers","value":"6","trend":"+15.1%","isPositive":true},{"title":"Total Orders","value":"4","trend":"+4.1%","isPositive":true},{"title":"Total Revenue","value":"₹60.00","trend":"-1.2%","isPositive":false}],"products":[{"title":"Total Products","value":"5","trend":"+5","isPositive":true},{"title":"Low Stock Items","value":"4","trend":"-4","isPositive":true},{"title":"Out of Stock","value":"0","trend":"+0","isPositive":true}],"orders":[{"title":"Total Orders","value":"4","trend":"+4","isPositive":true},{"title":"Completed","value":"0","trend":"+0","isPositive":true},{"title":"Pending Payments","value":"2","trend":"+2","isPositive":false},{"title":"Cancelled","value":"0","trend":"-0","isPositive":true}]}
+prisma:query SELECT "public"."Product"."id", "public"."Product"."name", "public"."Product"."batchNumber", "public"."Product"."stock", "public"."Product"."purchasePrice", "public"."Product"."sellingPrice", "public"."Product"."expiryDate", "public"."Product"."createdAt" FROM "public"."Product" WHERE "public"."Product"."id" IN ($1,$2) OFFSET $3
+prisma:query COMMIT
+3:23:10 PM [express] GET /api/orders 304 in 3556ms :: {"items":[{"id":"cmmaef5xk000fwc4sb2tczb3s","customerName":"Aryan Rathod","orderDate":"2026-03-03","products":["Amoxicillin 500mg"],"paymentMethod":"UPI","totalAmount":30,"paymentStatus":"PAID","orderStatus":"PENDING"},{"id":"cmmae93y70008wc4sqx1jbqfv","customerName":"New Cust","orderDate":"2026-03-03","products":["Amoxicillin 500mg"],"paymentMethod":"CASH","totalAmount":30,"paymentStatus":"PAID","orderStatus":"PENDING"},{"id":"cmmae8y8y0004wc4sb9wd031m","customerName":"New Cust","orderDate":"2026-03-03","products":["Amoxicillin 500mg"],"paymentMethod":"PENDING","totalAmount":60,"paymentStatus":"PENDING","orderStatus":"PENDING"},{"id":"cmmadep6t0003wc8gu4wn1k66","customerName":"Rathod Rekha","orderDate":"2026-03-03","products":["Amoxicillin 500mg"],"paymentMethod":"PENDING","totalAmount":12,"paymentStatus":"PENDING","orderStatus":"PENDING"}],"total":4,"page":1,"limit":10,"totalPages":1}
+3:23:15 PM [express] GET /api/rxnorm/search 200 in 3170ms :: {"query":"asd","count":0,"items":[],"suggestions":[]}
+3:23:18 PM [express] GET /api/rxnorm/search 200 in 404ms :: {"query":"azi","count":0,"items":[],"suggestions":[]}
+3:23:19 PM [express] GET /api/rxnorm/search 200 in 294ms :: {"query":"azit","count":0,"items":[],"suggestions":[]}
+3:23:22 PM [express] GET /api/rxnorm/search 200 in 336ms :: {"query":"azih","count":0,"items":[],"suggestions":[]}
+3:23:23 PM [express] GET /api/rxnorm/search 200 in 314ms :: {"query":"azihh","count":0,"items":[],"suggestions":[]}
+3:23:31 PM [express] GET /api/rxnorm/search 200 in 3152ms :: {"query":"par","count":0,"items":[],"suggestions":[]}
+3:23:31 PM [express] GET /api/rxnorm/search 200 in 3023ms :: {"query":"para","count":0,"items":[],"suggestions":[]}
+3:23:39 PM [express] GET /api/rxnorm/search 200 in 3134ms :: {"query":"param","count":0,"items":[],"suggestions":[]}
+3:24:42 PM [express] GET /api/rxnorm/search 304 in 1498ms :: {"query":"para","count":0,"items":[],"suggestions":[]}
+3:24:43 PM [express] GET /api/rxnorm/search 304 in 3094ms :: {"query":"par","count":0,"items":[],"suggestions":[]}
+3:24:45 PM [express] GET /api/rxnorm/search 200 in 312ms :: {"query":"Amo","count":0,"items":[],"suggestions":[]}
+3:24:45 PM [express] GET /api/rxnorm/search 200 in 307ms :: {"query":"Amop","count":0,"items":[],"suggestions":[]}
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Product"."id" FROM "public"."Product" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT "public"."Product"."id", "public"."Product"."name", "public"."Product"."batchNumber", "public"."Product"."stock", "public"."Product"."purchasePrice", "public"."Product"."sellingPrice", "public"."Product"."expiryDate", "public"."Product"."createdAt" FROM "public"."Product" WHERE 1=1 ORDER BY "public"."Product"."createdAt" DESC LIMIT $1 OFFSET $2
+prisma:query SELECT "public"."Customer"."id", "public"."Customer"."name", "public"."Customer"."email", "public"."Customer"."phone" FROM "public"."Customer" WHERE 1=1 ORDER BY "public"."Customer"."name" ASC LIMIT $1 OFFSET $2
+prisma:query COMMIT
+prisma:query COMMIT
+3:24:55 PM [express] GET /api/customers/options 200 in 1590ms :: {"items":[{"id":"cmmaed1iw000dwc4sciasrg2u","name":"Aryan Rathod","email":"afdsa@gmail.com","phone":"7863868011"},{"id":"cmmae8x7j0002wc4srssexvji","name":"New Cust","email":"cust2_1772529406275@example.com","phone":"9999999999"},{"id":"cmmac42od0002wcrkwk6rkn8h","name":"Rathod Rekha","email":"aaryan.b.rathod99@gmail.com","phone":"9316688014"},{"id":"cmmacjbwp0003wcrk0s4rwfxl","name":"Rathod Rekha","email":"aaryan.b.rathod99@gmail.com","phone":"+919316688014"},{"id":"cmmacws8s0005wcrkrmx0hzsd","name":"Rathod Rekha","email":"aaryan.b.rathod99@gmail.com","phone":"9316688014"},{"id":"cmmadeape0001wc8gv4lsve71","name":"Rathod Rekha","email":"aaryan.b.rathod99@gmail.com","phone":"+919316688014"}]}
+prisma:query COMMIT
+3:24:55 PM [express] GET /api/products 200 in 1590ms :: {"items":[{"id":"cmmae8vc60001wc4sicmm3d4n","name":"Amoxicillin 500mg","category":"Antibiotics","batchNumber":"FLOW2-1772529406275","stock":6,"purchasePrice":20,"sellingPrice":30,"expiryDate":"2027-01-01","status":"low stock","createdAt":"2026-03-03T09:16:51.751Z"},{"id":"cmmae65op0001wce07i29p9cq","name":"Amoxicillin 500mg","category":"Antibiotics","batchNumber":"FLOW-1772529280682","stock":10,"purchasePrice":20,"sellingPrice":30,"expiryDate":"2027-01-01","status":"low stock","createdAt":"2026-03-03T09:14:45.194Z"},{"id":"cmmaddor60000wc8gebtfycmc","name":"as","category":"Uncategorized","batchNumber":"sad","stock":12,"purchasePrice":12,"sellingPrice":14,"expiryDate":"2026-05-24","status":"low stock","createdAt":"2026-03-03T08:52:36.619Z"},{"id":"cmmad927n0003wclwjgxzajb2","name":"Amoxicillin 500mg","category":"Antibiotics","batchNumber":"CAT-1772527741034","stock":9,"purchasePrice":10,"sellingPrice":12,"expiryDate":"2027-01-01","status":"low stock","createdAt":"2026-03-03T08:49:01.043Z"},{"id":"cmmacwdp70004wcrkq2xlqm55","name":"as","category":"Uncategorized","batchNumber":"sad","stock":12222,"purchasePrice":12,"sellingPrice":235,"expiryDate":"2025-05-15","status":"in stock","createdAt":"2026-03-03T08:39:09.207Z"}],"total":5,"page":1,"limit":50,"totalPages":1}

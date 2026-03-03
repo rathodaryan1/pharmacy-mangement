@@ -4,6 +4,7 @@ import { LayoutDashboard, Package, ShoppingCart, TrendingUp, Users, CreditCard, 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navigation = [
   { name: "Overview", href: "/", icon: LayoutDashboard },
@@ -17,6 +18,7 @@ const navigation = [
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
+  const { user, logout } = useAuth();
 
   // Custom CSS properties to style the Sidebar component without passing className directly to it
   const sidebarStyle = {
@@ -85,7 +87,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="p-4">
-              <Button variant="ghost" className="w-full justify-start text-white/70 hover:text-white hover:bg-white/10 rounded-xl h-12">
+              <Button variant="ghost" className="w-full justify-start text-white/70 hover:text-white hover:bg-white/10 rounded-xl h-12" onClick={logout}>
                 <LogOut className="w-5 h-5 mr-3" />
                 Logout
               </Button>
@@ -115,12 +117,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="h-10 w-px bg-border/50 mx-2"></div>
               <div className="flex items-center gap-3 cursor-pointer p-1 pr-4 rounded-full bg-white shadow-sm border border-border/50 hover:bg-gray-50 transition-colors">
                 <Avatar className="h-9 w-9 border border-primary/20">
-                  <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
-                  <AvatarFallback>AD</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                    {user?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2) ?? "U"}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="hidden sm:block text-sm">
-                  <p className="font-semibold text-foreground leading-none mb-1">Dr. Smith</p>
-                  <p className="text-muted-foreground text-xs leading-none">Admin</p>
+                  <p className="font-semibold text-foreground leading-none mb-1">{user?.name ?? "User"}</p>
+                  <p className="text-muted-foreground text-xs leading-none">{user?.role ?? "Staff"}</p>
                 </div>
               </div>
             </div>
