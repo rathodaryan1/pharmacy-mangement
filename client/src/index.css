@@ -65,37 +65,37 @@
   }
 
   .dark {
-    /* Minimal dark mode support for completeness, though design specifies light gray */
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 13%;
-    --card-foreground: 210 40% 98%;
-    --card-border: 214 32% 20%;
-    --popover: 222 47% 13%;
-    --popover-foreground: 210 40% 98%;
-    --popover-border: 214 32% 20%;
-    --primary: 84 81% 44%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 217 32% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 32% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 84 81% 25%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62% 30%;
+    color-scheme: dark;
+    --background: 222 32% 9%;
+    --foreground: 210 40% 96%;
+    --card: 222 28% 12%;
+    --card-foreground: 210 40% 96%;
+    --card-border: 220 22% 20%;
+    --popover: 222 28% 12%;
+    --popover-foreground: 210 40% 96%;
+    --popover-border: 220 22% 20%;
+    --primary: 84 78% 52%;
+    --primary-foreground: 220 30% 8%;
+    --secondary: 220 24% 16%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 220 24% 16%;
+    --muted-foreground: 215 18% 72%;
+    --accent: 220 24% 18%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 72% 48%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 32% 17%;
-    --input: 217 32% 17%;
-    --ring: 84 81% 44%;
+    --border: 220 22% 22%;
+    --input: 220 22% 22%;
+    --ring: 84 78% 52%;
     
-    --sidebar-background: 160 84% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 84 81% 44%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 160 84% 15%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 84 81% 44%;
+    --sidebar-background: 160 68% 10%;
+    --sidebar-foreground: 210 38% 95%;
+    --sidebar-primary: 84 78% 52%;
+    --sidebar-primary-foreground: 220 30% 8%;
+    --sidebar-accent: 160 58% 16%;
+    --sidebar-accent-foreground: 210 38% 95%;
+    --sidebar-border: 160 44% 22%;
+    --sidebar-ring: 84 78% 52%;
   }
 }
 
@@ -119,12 +119,20 @@
     @apply bg-white/80 backdrop-blur-md border border-white/20;
   }
 
+  .dark .glass-effect {
+    @apply bg-black/25 border-white/10;
+  }
+
   /* Custom overrides for the required soft design */
   .card-container {
-    @apply bg-card rounded-2xl soft-shadow border border-card-border p-6 transition-all duration-300;
+    @apply bg-card rounded-2xl soft-shadow border border-card-border p-4 sm:p-6 transition-all duration-300;
   }
 
   .hover-elevate {
     @apply hover:-translate-y-0.5 hover:shadow-lg transition-transform duration-300;
+  }
+
+  .dark .soft-shadow {
+    box-shadow: 0 10px 24px -16px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.03);
   }
 }

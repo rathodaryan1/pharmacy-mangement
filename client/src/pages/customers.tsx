@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type CustomerRow = {
   id: string;
@@ -61,103 +61,108 @@ export default function Customers() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Customers</h1>
-          <p className="text-muted-foreground mt-1">Manage your customer database and loyalty.</p>
+          <p className="mt-1 text-muted-foreground">Manage your customer database and loyalty.</p>
         </div>
-        <Button className="bg-sidebar-background hover:bg-sidebar-background/90 text-white rounded-xl shadow-lg" onClick={() => setAddOpen(true)}>
-          <UserPlus className="w-4 h-4 mr-2" /> Add Customer
+        <Button
+          className="rounded-xl border border-primary/20 bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90"
+          onClick={() => setAddOpen(true)}
+        >
+          <UserPlus className="mr-2 h-4 w-4" /> Add Customer
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="card-container bg-gradient-to-br from-sidebar-background to-emerald-800 text-white border-none relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-          <CardContent className="p-2 relative z-10">
-            <p className="text-white/80 text-sm font-medium mb-1">Total Customers</p>
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+        <Card className="card-container relative overflow-hidden border-none bg-gradient-to-br from-sidebar-background to-emerald-800 text-white">
+          <div className="absolute -mr-10 -mt-10 h-32 w-32 rounded-full bg-white/10 blur-2xl"></div>
+          <CardContent className="relative z-10 p-2">
+            <p className="mb-1 text-sm font-medium text-white/80">Total Customers</p>
             <h3 className="text-4xl font-bold">{total}</h3>
-            <p className="text-white/60 text-xs mt-2">From database</p>
+            <p className="mt-2 text-xs text-white/60">From database</p>
           </CardContent>
         </Card>
         <Card className="card-container hover-elevate border-none">
           <CardContent className="p-2">
-            <p className="text-muted-foreground text-sm font-medium mb-1">Active Customers</p>
+            <p className="mb-1 text-sm font-medium text-muted-foreground">Active Customers</p>
             <h3 className="text-3xl font-bold text-foreground">{total}</h3>
-            <p className="text-emerald-500 text-xs font-medium mt-2">With orders</p>
+            <p className="mt-2 text-xs font-medium text-emerald-500">With orders</p>
           </CardContent>
         </Card>
         <Card className="card-container hover-elevate border-none">
           <CardContent className="p-2">
-            <p className="text-muted-foreground text-sm font-medium mb-1">Customer Retention</p>
-            <h3 className="text-3xl font-bold text-foreground">—</h3>
-            <p className="text-emerald-500 text-xs font-medium mt-2">—</p>
+            <p className="mb-1 text-sm font-medium text-muted-foreground">Customer Retention</p>
+            <h3 className="text-3xl font-bold text-foreground">--</h3>
+            <p className="mt-2 text-xs font-medium text-emerald-500">--</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="card-container p-0 overflow-hidden border-none">
-        <div className="p-6 border-b border-border/50 flex justify-between items-center bg-white/50">
+      <Card className="card-container overflow-hidden border-none p-0">
+        <div className="flex items-center justify-between border-b border-border/50 bg-muted/30 p-6">
           <div className="relative w-full max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search customers..."
-              className="pl-10 bg-background border-border/50 rounded-xl"
+              className="rounded-xl border-border/50 bg-background pl-10"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-muted-foreground uppercase bg-background">
-              <tr>
-                <th className="px-6 py-4 font-medium">Customer Details</th>
-                <th className="px-6 py-4 font-medium">Contact</th>
-                <th className="px-6 py-4 font-medium">Total Orders</th>
-                <th className="px-6 py-4 font-medium">Total Spend</th>
-                <th className="px-6 py-4 font-medium">Last Order</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50 bg-white">
-              {isLoading ? (
-                <tr><td colSpan={6} className="px-6 py-8"><Skeleton className="h-8 w-full" /></td></tr>
-              ) : (
-                customersList.map((customer) => (
-                  <tr key={customer.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-6 py-4 flex items-center gap-3">
+        <Table>
+          <TableHeader className="bg-background">
+            <TableRow>
+              <TableHead className="font-medium">Customer Details</TableHead>
+              <TableHead className="font-medium">Contact</TableHead>
+              <TableHead className="font-medium">Total Orders</TableHead>
+              <TableHead className="font-medium">Total Spend</TableHead>
+              <TableHead className="font-medium">Last Order</TableHead>
+              <TableHead className="text-right font-medium">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="py-8"><Skeleton className="h-8 w-full" /></TableCell>
+              </TableRow>
+            ) : (
+              customersList.map((customer) => (
+                <TableRow key={customer.id} className="hover:bg-muted/20">
+                  <TableCell>
+                    <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border border-primary/20">
-                        <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                        <AvatarFallback className="bg-primary/10 font-bold text-primary">
                           {customer.name.split(" ").map((n) => n[0]).join("")}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-semibold text-foreground text-base">{customer.name}</div>
+                        <div className="text-base font-semibold text-foreground">{customer.name}</div>
                         <div className="text-xs text-muted-foreground">{customer.id}</div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-muted-foreground">
-                      <div className="flex items-center gap-1 mb-1"><Mail className="w-3 h-3"/> {customer.email}</div>
-                      <div className="flex items-center gap-1"><Phone className="w-3 h-3"/> {customer.phone || "—"}</div>
-                    </td>
-                    <td className="px-6 py-4 font-medium text-center">
-                      <span className="bg-secondary px-3 py-1 rounded-full">{customer.ordersPlaced}</span>
-                    </td>
-                    <td className="px-6 py-4 font-bold text-primary">₹{customer.totalSpend?.toFixed(2) ?? "0.00"}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{customer.lastOrderDate || "—"}</td>
-                    <td className="px-6 py-4 text-right">
-                      <Button variant="ghost" size="icon" className="rounded-lg h-8 w-8 hover:bg-secondary text-muted-foreground">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    <div className="mb-1 flex items-center gap-1"><Mail className="h-3 w-3" /> {customer.email}</div>
+                    <div className="flex items-center gap-1"><Phone className="h-3 w-3" /> {customer.phone || "--"}</div>
+                  </TableCell>
+                  <TableCell className="text-center font-medium">
+                    <span className="rounded-full bg-secondary px-3 py-1">{customer.ordersPlaced}</span>
+                  </TableCell>
+                  <TableCell className="font-bold text-primary">Rs {customer.totalSpend?.toFixed(2) ?? "0.00"}</TableCell>
+                  <TableCell className="text-muted-foreground">{customer.lastOrderDate || "--"}</TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-secondary">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </Card>
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
@@ -186,4 +191,3 @@ export default function Customers() {
     </>
   );
 }
-

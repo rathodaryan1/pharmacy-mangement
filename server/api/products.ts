@@ -21,6 +21,23 @@ function inferCategory(name: string): string {
   return "Uncategorized";
 }
 
+function buildCategoryFilter(category: string): Record<string, unknown> | null {
+  if (!category || category === "All") return null;
+
+  if (category === "Uncategorized") {
+    const allKeywords = Object.values(CATEGORY_KEYWORDS).flat();
+    return {
+      AND: allKeywords.map((kw) => ({ name: { not: { contains: kw, mode: "insensitive" as const } } })),
+    };
+  }
+
+  const keywords = CATEGORY_KEYWORDS[category];
+  if (!keywords?.length) return null;
+  return {
+    OR: keywords.map((kw) => ({ name: { contains: kw, mode: "insensitive" as const } })),
+  };
+}
+
 function toProductRow(p: {
   id: string;
   name: string;
@@ -65,21 +82,8 @@ router.get("/", async (req: AuthRequest, res: Response) => {
         ],
       });
     }
-    if (category && category !== "All") {
-      if (category === "Uncategorized") {
-        const allKeywords = Object.values(CATEGORY_KEYWORDS).flat();
-        andFilters.push({
-          AND: allKeywords.map((kw) => ({ name: { not: { contains: kw, mode: "insensitive" as const } } })),
-        });
-      } else {
-        const keywords = CATEGORY_KEYWORDS[category];
-        if (keywords?.length) {
-          andFilters.push({
-            OR: keywords.map((kw) => ({ name: { contains: kw, mode: "insensitive" as const } })),
-          });
-        }
-      }
-    }
+    const categoryFilter = buildCategoryFilter(category);
+    if (categoryFilter) andFilters.push(categoryFilter);
     const where = andFilters.length ? { AND: andFilters } : {};
     const [items, total] = await Promise.all([
       prisma.product.findMany({ where, skip, take: limit, orderBy: { createdAt: "desc" } }),
@@ -125,15 +129,22 @@ router.get("/meta/categories", async (_req: AuthRequest, res: Response) => {
 router.get("/search", async (req: AuthRequest, res: Response) => {
   try {
     const query = String(req.query.q ?? "").trim();
+    const category = String(req.query.category ?? "").trim();
     if (query.length === 0) {
       return res.json([]);
     }
 
+    const where: Record<string, unknown> = {
+      name: { contains: query, mode: "insensitive" as const },
+      stock: { gt: 0 },
+    };
+    const categoryFilter = buildCategoryFilter(category);
+    if (categoryFilter) {
+      where.AND = [categoryFilter];
+    }
+
     const items = await prisma.product.findMany({
-      where: {
-        name: { contains: query, mode: "insensitive" as const },
-        stock: { gt: 0 },
-      },
+      where,
       select: {
         id: true,
         name: true,
@@ -152,6 +163,7 @@ router.get("/search", async (req: AuthRequest, res: Response) => {
         batchNumber: item.batchNumber,
         sellingPrice: Number(item.sellingPrice),
         stock: item.stock,
+        category: inferCategory(item.name),
       })),
     );
   } catch (e) {

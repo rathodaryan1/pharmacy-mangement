@@ -42,7 +42,7 @@ export default function Dashboard() {
     const start = new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10);
     const end = new Date().toISOString().slice(0, 10);
     try {
-      const res = await fetch(`/api/reports/sales-summary/pdf?start=${start}&end=${end}`, {
+      const res = await fetch(`/api/reports/sales-summary/excel?start=${start}&end=${end}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Download failed");
@@ -50,10 +50,10 @@ export default function Dashboard() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `sales-report-${start}-${end}.pdf`;
+      a.download = `sales-report-${start}-${end}.xls`;
       a.click();
       URL.revokeObjectURL(url);
-      toast({ title: "Report", description: "PDF downloaded." });
+      toast({ title: "Report", description: "Excel downloaded." });
     } catch {
       toast({ title: "Error", description: "Could not download report", variant: "destructive" });
     }
@@ -61,13 +61,13 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Overview</h1>
           <p className="text-muted-foreground mt-1">Here is the summary of your pharmacy performance.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 shadow-lg shadow-primary/25" onClick={handleDownloadReport}>
-          Download Report
+        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl px-4 sm:px-6 shadow-lg shadow-primary/25 w-full sm:w-auto" onClick={handleDownloadReport}>
+          Download Excel Report
         </Button>
       </div>
 

@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar as CalendarIcon, Eye, Plus, Trash2 } from "lucide-react";
+import { Search, Calendar as CalendarIcon, Eye, Plus, Trash2, FileDown } from "lucide-react";
 import { apiGet, apiPost } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type OrderRow = {
   id: string;
@@ -184,6 +186,26 @@ export default function Orders() {
   const ordersList = ordersData?.items ?? [];
   const totalPages = ordersData?.totalPages ?? 1;
 
+  const downloadInvoice = async (orderId: string) => {
+    const token = localStorage.getItem("pharmacy_token");
+    try {
+      const res = await fetch(`/api/orders/${orderId}/invoice`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Invoice download failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `invoice-${orderId}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Invoice downloaded", description: `Invoice for order ${orderId} is ready.` });
+    } catch {
+      toast({ title: "Error", description: "Could not download invoice", variant: "destructive" });
+    }
+  };
+
   const submitCreateOrder = () => {
     const validItems = createItems
       .filter((i) => i.productId && i.quantity > 0)
@@ -242,7 +264,10 @@ export default function Orders() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Orders</h1>
           <p className="text-muted-foreground mt-1">Manage and track customer orders.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl shadow-lg shadow-primary/25" onClick={() => setCreateOpen(true)}>
+        <Button
+          className="w-full rounded-xl border border-primary/20 bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 sm:w-auto"
+          onClick={() => setCreateOpen(true)}
+        >
           Create Order
         </Button>
       </div>
@@ -266,8 +291,8 @@ export default function Orders() {
       </div>
 
       <Card className="card-container p-0 overflow-hidden">
-        <div className="p-6 border-b border-border/50 flex flex-col sm:flex-row justify-between gap-4 bg-white/50">
-          <div className="flex gap-4 w-full sm:w-auto">
+        <div className="bg-muted/30 p-4 sm:p-6 border-b border-border/50 flex flex-col lg:flex-row justify-between gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full lg:w-auto">
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -277,16 +302,16 @@ export default function Orders() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Button variant="outline" className="rounded-xl border-border/50 px-3">
+            <Button variant="outline" className="rounded-xl border-border/50 px-3 w-full sm:w-auto">
               <CalendarIcon className="w-4 h-4 text-muted-foreground" />
             </Button>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             {["All", "Completed", "Pending", "Cancelled"].map((status) => (
               <Button
                 key={status}
                 variant={status === statusFilter ? "default" : "outline"}
-                className={`rounded-xl ${status === statusFilter ? "bg-sidebar-background text-white shadow-md" : "border-border/50 text-muted-foreground"}`}
+                className={`rounded-xl whitespace-nowrap ${status === statusFilter ? "bg-sidebar-background text-white shadow-md" : "border-border/50 text-muted-foreground"}`}
                 onClick={() => setStatusFilter(status)}
               >
                 {status}
@@ -295,70 +320,84 @@ export default function Orders() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-muted-foreground uppercase bg-background">
-              <tr>
-                <th className="px-6 py-4 font-medium">Order ID</th>
-                <th className="px-6 py-4 font-medium">Customer</th>
-                <th className="px-6 py-4 font-medium">Date</th>
-                <th className="px-6 py-4 font-medium">Amount</th>
-                <th className="px-6 py-4 font-medium">Payment</th>
-                <th className="px-6 py-4 font-medium">Order Status</th>
-                <th className="px-6 py-4 font-medium text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50 bg-white">
-              {ordersLoading ? (
-                <tr><td colSpan={7} className="px-6 py-8"><Skeleton className="h-8 w-full" /></td></tr>
-              ) : (
-                ordersList.map((order) => (
-                  <tr key={order.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-sidebar-background">{order.id}</td>
-                    <td className="px-6 py-4 font-medium">{order.customerName}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{order.orderDate}</td>
-                    <td className="px-6 py-4 font-bold text-foreground">Rs {order.totalAmount?.toFixed(2) ?? "0.00"}</td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className={`
-                        border-0
-                        ${order.paymentStatus === "PAID" ? "bg-emerald-50 text-emerald-700" : ""}
-                        ${order.paymentStatus === "PENDING" ? "bg-amber-50 text-amber-700" : ""}
-                        ${order.paymentStatus === "FAILED" ? "bg-red-50 text-red-700" : ""}
-                      `}>
-                        {order.paymentStatus}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className={`
-                        border-0
-                        ${order.orderStatus === "COMPLETED" ? "bg-emerald-100 text-emerald-700" : ""}
-                        ${order.orderStatus === "PENDING" ? "bg-amber-100 text-amber-700" : ""}
-                        ${order.orderStatus === "IN_PROGRESS" ? "bg-blue-100 text-blue-700" : ""}
-                        ${order.orderStatus === "CANCELLED" ? "bg-red-100 text-red-700" : ""}
-                      `}>
-                        {order.orderStatus?.replace("_", " ") ?? order.orderStatus}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-right">
+        <Table className="min-w-[760px] md:min-w-full">
+          <TableHeader className="bg-background">
+            <TableRow>
+              <TableHead className="font-medium">Order ID</TableHead>
+              <TableHead className="font-medium">Customer</TableHead>
+              <TableHead className="hidden font-medium md:table-cell">Date</TableHead>
+              <TableHead className="font-medium">Amount</TableHead>
+              <TableHead className="hidden font-medium sm:table-cell">Payment</TableHead>
+              <TableHead className="font-medium">Order Status</TableHead>
+              <TableHead className="text-right font-medium">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {ordersLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="py-8">
+                  <Skeleton className="h-8 w-full" />
+                </TableCell>
+              </TableRow>
+            ) : (
+              ordersList.map((order) => (
+                <TableRow key={order.id} className="hover:bg-muted/20">
+                  <TableCell className="font-semibold text-sidebar-background">{order.id}</TableCell>
+                  <TableCell className="font-medium">{order.customerName}</TableCell>
+                  <TableCell className="hidden text-muted-foreground md:table-cell">{order.orderDate}</TableCell>
+                  <TableCell className="font-bold text-foreground">Rs {order.totalAmount?.toFixed(2) ?? "0.00"}</TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <Badge variant="outline" className={`
+                      border-0
+                      ${order.paymentStatus === "PAID" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200" : ""}
+                      ${order.paymentStatus === "PENDING" ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200" : ""}
+                      ${order.paymentStatus === "FAILED" ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-200" : ""}
+                    `}>
+                      {order.paymentStatus}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={`
+                      border-0
+                      ${order.orderStatus === "COMPLETED" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200" : ""}
+                      ${order.orderStatus === "PENDING" ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200" : ""}
+                      ${order.orderStatus === "IN_PROGRESS" ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-200" : ""}
+                      ${order.orderStatus === "CANCELLED" ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-200" : ""}
+                    `}>
+                      {order.orderStatus?.replace("_", " ") ?? order.orderStatus}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1 sm:gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="rounded-lg hover:bg-primary/10 hover:text-primary text-muted-foreground"
+                        className="rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary"
                         onClick={() =>
                           apiGet(`/api/orders/${order.id}`).then((o: unknown) =>
                             toast({ title: "Order", description: JSON.stringify((o as { totalAmount?: number })?.totalAmount ?? o) })
                           )
                         }
                       >
-                        <Eye className="w-4 h-4 mr-2" /> View
+                        <Eye className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">View</span>
                       </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-lg border-border/60"
+                        onClick={() => downloadInvoice(order.id)}
+                      >
+                        <FileDown className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Invoice</span>
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </Card>
 
       <Dialog
@@ -368,7 +407,7 @@ export default function Orders() {
           if (!open) resetCreateOrderForm();
         }}
       >
-        <DialogContent className="rounded-2xl max-w-4xl">
+        <DialogContent className="rounded-2xl max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create Order</DialogTitle>
           </DialogHeader>
@@ -420,10 +459,12 @@ export default function Orders() {
                         </div>
                       ) : (
                         (customersData?.items ?? []).map((c) => (
-                          <button
+                          <Button
                             key={c.id}
                             type="button"
-                            className="w-full text-left px-3 py-2 hover:bg-muted/50"
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto w-full justify-start px-3 py-2 text-left hover:bg-muted/50"
                             onMouseDown={(e) => {
                               e.preventDefault();
                               setCreateCustomerId(c.id);
@@ -436,7 +477,7 @@ export default function Orders() {
                               {c.email}
                               {c.phone ? ` | ${c.phone}` : ""}
                             </div>
-                          </button>
+                          </Button>
                         ))
                       )}
                     </div>
@@ -517,10 +558,12 @@ export default function Orders() {
                               <div className="px-3 py-2 text-xs text-muted-foreground">No matching medicines found</div>
                             ) : (
                               rowOptions.map((p) => (
-                                <button
+                                <Button
                                   key={p.id}
                                   type="button"
-                                  className="w-full text-left px-3 py-2 hover:bg-muted/50"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-auto w-full justify-start px-3 py-2 text-left hover:bg-muted/50"
                                   onMouseDown={(e) => {
                                     e.preventDefault();
                                     setCreateItems((prev) =>
@@ -537,7 +580,7 @@ export default function Orders() {
                                   <div className="text-xs text-muted-foreground">
                                     Batch: {p.batchNumber} | Stock: {p.stock} | Rs {p.sellingPrice}
                                   </div>
-                                </button>
+                                </Button>
                               ))
                             )}
                           </div>
@@ -580,6 +623,7 @@ export default function Orders() {
                 type="button"
                 variant="outline"
                 size="sm"
+                className="border-primary/40 text-primary hover:bg-primary/10"
                 onClick={() => setCreateItems((prev) => [...prev, { productId: "", quantity: 1, query: "" }])}
               >
                 <Plus className="w-4 h-4 mr-1" /> Add Product Row
@@ -589,17 +633,18 @@ export default function Orders() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 rounded-xl border border-border/60 p-4">
                 <Label>Payment Method</Label>
-                <select
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2"
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                >
-                  <option value="PENDING">Pending</option>
-                  <option value="CASH">Cash</option>
-                  <option value="UPI">UPI</option>
-                  <option value="CARD">Card</option>
-                  <option value="BANK">Bank</option>
-                </select>
+                <Select value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
+                  <SelectTrigger className="w-full rounded-lg">
+                    <SelectValue placeholder="Select payment method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PENDING">Pending</SelectItem>
+                    <SelectItem value="CASH">Cash</SelectItem>
+                    <SelectItem value="UPI">UPI</SelectItem>
+                    <SelectItem value="CARD">Card</SelectItem>
+                    <SelectItem value="BANK">Bank</SelectItem>
+                  </SelectContent>
+                </Select>
                 <p className="text-xs text-muted-foreground">Payment status will be {paymentMethod === "PENDING" ? "PENDING" : "PAID"}.</p>
               </div>
 

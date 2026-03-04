@@ -6,6 +6,7 @@ import { CreditCard, ArrowDownToLine, CheckCircle2, Clock, AlertCircle } from "l
 import { apiGet } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type PaymentRow = {
   id: string;
@@ -37,7 +38,7 @@ export default function Payments() {
     const start = new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10);
     const end = new Date().toISOString().slice(0, 10);
     try {
-      const res = await fetch(`/api/reports/sales-summary/csv?start=${start}&end=${end}`, {
+      const res = await fetch(`/api/reports/sales-summary/excel?start=${start}&end=${end}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Download failed");
@@ -45,10 +46,10 @@ export default function Payments() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `statement-${start}-${end}.csv`;
+      a.download = `statement-${start}-${end}.xls`;
       a.click();
       URL.revokeObjectURL(url);
-      toast({ title: "Download", description: "CSV downloaded." });
+      toast({ title: "Download", description: "Excel report downloaded." });
     } catch {
       toast({ title: "Error", description: "Could not download", variant: "destructive" });
     }
@@ -56,105 +57,109 @@ export default function Payments() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Payments</h1>
-          <p className="text-muted-foreground mt-1">Track transactions and payment statuses.</p>
+          <p className="mt-1 text-muted-foreground">Track transactions and payment statuses.</p>
         </div>
-        <Button variant="outline" className="rounded-xl shadow-sm border-border/50" onClick={handleDownload}>
-          <ArrowDownToLine className="w-4 h-4 mr-2" /> Download Statement
+        <Button
+          variant="outline"
+          className="w-full rounded-xl border-border/50 shadow-sm sm:w-auto"
+          onClick={handleDownload}
+        >
+          <ArrowDownToLine className="mr-2 h-4 w-4" /> Download Statement
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
         <Card className="card-container border-none shadow-md shadow-emerald-900/5">
-          <CardContent className="p-2 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-              <CheckCircle2 className="w-6 h-6" />
+          <CardContent className="flex items-center gap-4 p-2">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <CheckCircle2 className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-muted-foreground text-sm font-medium">Successful Payments</p>
-              <h3 className="text-2xl font-bold text-foreground">₹{completedTotal.toFixed(2)}</h3>
+              <p className="text-sm font-medium text-muted-foreground">Successful Payments</p>
+              <h3 className="text-2xl font-bold text-foreground">Rs {completedTotal.toFixed(2)}</h3>
             </div>
           </CardContent>
         </Card>
         <Card className="card-container border-none shadow-md shadow-amber-900/5">
-          <CardContent className="p-2 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-              <Clock className="w-6 h-6" />
+          <CardContent className="flex items-center gap-4 p-2">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+              <Clock className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-muted-foreground text-sm font-medium">Pending Processing</p>
-              <h3 className="text-2xl font-bold text-foreground">₹{pendingTotal.toFixed(2)}</h3>
+              <p className="text-sm font-medium text-muted-foreground">Pending Processing</p>
+              <h3 className="text-2xl font-bold text-foreground">Rs {pendingTotal.toFixed(2)}</h3>
             </div>
           </CardContent>
         </Card>
         <Card className="card-container border-none shadow-md shadow-red-900/5">
-          <CardContent className="p-2 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-              <AlertCircle className="w-6 h-6" />
+          <CardContent className="flex items-center gap-4 p-2">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+              <AlertCircle className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-muted-foreground text-sm font-medium">Failed Transactions</p>
-              <h3 className="text-2xl font-bold text-foreground">₹{failedTotal.toFixed(2)}</h3>
+              <p className="text-sm font-medium text-muted-foreground">Failed Transactions</p>
+              <h3 className="text-2xl font-bold text-foreground">Rs {failedTotal.toFixed(2)}</h3>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="card-container p-0 overflow-hidden border-none">
-        <div className="p-6 border-b border-border/50 bg-white/50">
+      <Card className="card-container overflow-hidden p-0">
+        <div className="border-b border-border/50 bg-muted/30 p-4 sm:p-6">
           <h3 className="text-lg font-semibold">Transaction History</h3>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-muted-foreground uppercase bg-background">
-              <tr>
-                <th className="px-6 py-4 font-medium">Transaction ID</th>
-                <th className="px-6 py-4 font-medium">Date & Time</th>
-                <th className="px-6 py-4 font-medium">Customer</th>
-                <th className="px-6 py-4 font-medium">Amount</th>
-                <th className="px-6 py-4 font-medium">Method</th>
-                <th className="px-6 py-4 font-medium">Order Ref</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50 bg-white">
-              {isLoading ? (
-                <tr><td colSpan={7} className="px-6 py-8"><Skeleton className="h-8 w-full" /></td></tr>
-              ) : (
-                paymentsList.map((payment) => (
-                  <tr key={payment.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-6 py-4 font-medium font-mono text-sidebar-background">{payment.transactionId ?? payment.id}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{payment.paymentDate}</td>
-                    <td className="px-6 py-4 font-medium">{payment.customerName}</td>
-                    <td className="px-6 py-4 font-bold">₹{payment.amount?.toFixed(2) ?? "0.00"}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <CreditCard className="w-4 h-4" /> {payment.method}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-primary underline cursor-pointer">{payment.orderId}</td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className={`
-                        border-0 px-3 py-1 rounded-full
-                        ${payment.status === "PAID" ? "bg-emerald-100 text-emerald-700" : ""}
-                        ${payment.status === "PENDING" ? "bg-amber-100 text-amber-700" : ""}
-                        ${payment.status === "FAILED" ? "bg-red-100 text-red-700" : ""}
-                      `}>
-                        {payment.status === "PAID" && <CheckCircle2 className="w-3 h-3 mr-1 inline" />}
-                        {payment.status === "PENDING" && <Clock className="w-3 h-3 mr-1 inline" />}
-                        {payment.status === "FAILED" && <AlertCircle className="w-3 h-3 mr-1 inline" />}
-                        {payment.status}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Table className="min-w-[760px] md:min-w-full">
+          <TableHeader className="bg-background">
+            <TableRow>
+              <TableHead className="font-medium">Transaction ID</TableHead>
+              <TableHead className="hidden font-medium md:table-cell">Date & Time</TableHead>
+              <TableHead className="font-medium">Customer</TableHead>
+              <TableHead className="font-medium">Amount</TableHead>
+              <TableHead className="hidden font-medium lg:table-cell">Method</TableHead>
+              <TableHead className="hidden font-medium md:table-cell">Order Ref</TableHead>
+              <TableHead className="font-medium">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="py-8"><Skeleton className="h-8 w-full" /></TableCell>
+              </TableRow>
+            ) : (
+              paymentsList.map((payment) => (
+                <TableRow key={payment.id} className="hover:bg-muted/20">
+                  <TableCell className="font-mono font-medium text-foreground">{payment.transactionId ?? payment.id}</TableCell>
+                  <TableCell className="hidden text-muted-foreground md:table-cell">{payment.paymentDate}</TableCell>
+                  <TableCell className="font-medium">{payment.customerName}</TableCell>
+                  <TableCell className="font-bold">Rs {payment.amount?.toFixed(2) ?? "0.00"}</TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <CreditCard className="h-4 w-4" /> {payment.method}
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden cursor-pointer text-primary underline md:table-cell">{payment.orderId}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={`
+                      rounded-full border-0 px-3 py-1
+                      ${payment.status === "PAID" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200" : ""}
+                      ${payment.status === "PENDING" ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200" : ""}
+                      ${payment.status === "FAILED" ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-200" : ""}
+                    `}>
+                      {payment.status === "PAID" && <CheckCircle2 className="mr-1 inline h-3 w-3" />}
+                      {payment.status === "PENDING" && <Clock className="mr-1 inline h-3 w-3" />}
+                      {payment.status === "FAILED" && <AlertCircle className="mr-1 inline h-3 w-3" />}
+                      {payment.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </Card>
     </>
   );

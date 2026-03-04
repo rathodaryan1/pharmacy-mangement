@@ -1,8 +1,8 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Bell, Shield, Palette, Globe, Save } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { apiPut } from "@/lib/api";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Settings() {
   const [notifications, setNotifications] = useState(true);
@@ -25,6 +26,8 @@ export default function Settings() {
   });
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [language, setLanguage] = useState("English (US)");
+  const [currency, setCurrency] = useState("USD ($)");
   const [saving, setSaving] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -41,18 +44,17 @@ export default function Settings() {
   }, [darkMode]);
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto max-w-4xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your account preferences and system configurations.</p>
+        <p className="mt-1 text-muted-foreground">Manage your account preferences and system configurations.</p>
       </div>
 
       <div className="grid gap-6">
-        {/* Appearance Settings */}
-        <Card className="card-container border-none bg-white">
+        <Card className="card-container">
           <CardHeader className="border-b border-border/50 pb-4">
             <div className="flex items-center gap-2">
-              <Palette className="w-5 h-5 text-primary" />
+              <Palette className="h-5 w-5 text-primary" />
               <CardTitle className="text-xl">Appearance</CardTitle>
             </div>
             <CardDescription>Customize how PharmaPro looks on your device.</CardDescription>
@@ -68,16 +70,15 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        {/* Security Settings */}
-        <Card className="card-container border-none bg-white">
+        <Card className="card-container">
           <CardHeader className="border-b border-border/50 pb-4">
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-primary" />
+              <Shield className="h-5 w-5 text-primary" />
               <CardTitle className="text-xl">Security</CardTitle>
             </div>
             <CardDescription>Manage your account security and authentication methods.</CardDescription>
           </CardHeader>
-          <CardContent className="pt-6 space-y-6">
+          <CardContent className="space-y-6 pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium text-foreground">Two-Factor Authentication</h4>
@@ -86,23 +87,22 @@ export default function Settings() {
               <Switch checked={twoFactor} onCheckedChange={setTwoFactor} className="data-[state=checked]:bg-primary" />
             </div>
             <div className="border-t border-border/50 pt-6">
-              <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700" onClick={() => setPasswordOpen(true)}>
+              <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => setPasswordOpen(true)}>
                 Change Password
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Notifications */}
-        <Card className="card-container border-none bg-white">
+        <Card className="card-container">
           <CardHeader className="border-b border-border/50 pb-4">
             <div className="flex items-center gap-2">
-              <Bell className="w-5 h-5 text-primary" />
+              <Bell className="h-5 w-5 text-primary" />
               <CardTitle className="text-xl">Notifications</CardTitle>
             </div>
             <CardDescription>Choose what updates you want to receive.</CardDescription>
           </CardHeader>
-          <CardContent className="pt-6 space-y-6">
+          <CardContent className="space-y-6 pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium text-foreground">Email Notifications</h4>
@@ -120,39 +120,48 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        {/* Region */}
-        <Card className="card-container border-none bg-white">
+        <Card className="card-container">
           <CardHeader className="border-b border-border/50 pb-4">
             <div className="flex items-center gap-2">
-              <Globe className="w-5 h-5 text-primary" />
+              <Globe className="h-5 w-5 text-primary" />
               <CardTitle className="text-xl">Region & Language</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Language</label>
-                <select className="w-full bg-background border border-border/50 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/20 outline-none">
-                  <option>English (US)</option>
-                  <option>Spanish</option>
-                  <option>French</option>
-                </select>
+                <Label className="mb-1.5 block text-sm font-medium">Language</Label>
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger className="w-full rounded-xl border-border/50 bg-background">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="English (US)">English (US)</SelectItem>
+                    <SelectItem value="Spanish">Spanish</SelectItem>
+                    <SelectItem value="French">French</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Currency</label>
-                <select className="w-full bg-background border border-border/50 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/20 outline-none">
-                  <option>USD ($)</option>
-                  <option>EUR (€)</option>
-                  <option>GBP (£)</option>
-                </select>
+                <Label className="mb-1.5 block text-sm font-medium">Currency</Label>
+                <Select value={currency} onValueChange={setCurrency}>
+                  <SelectTrigger className="w-full rounded-xl border-border/50 bg-background">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD ($)">USD ($)</SelectItem>
+                    <SelectItem value="EUR (EUR)">EUR (EUR)</SelectItem>
+                    <SelectItem value="GBP (GBP)">GBP (GBP)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="flex justify-end mt-4">
+        <div className="mt-4 flex justify-end">
           <Button
-            className="bg-primary hover:bg-primary/90 text-white rounded-xl px-8 shadow-lg shadow-primary/25"
+            className="rounded-xl bg-primary px-8 text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90"
             disabled={saving}
             onClick={async () => {
               setSaving(true);
@@ -166,7 +175,7 @@ export default function Settings() {
               }
             }}
           >
-            <Save className="w-4 h-4 mr-2" /> Save Changes
+            <Save className="mr-2 h-4 w-4" /> Save Changes
           </Button>
         </div>
       </div>
@@ -177,7 +186,7 @@ export default function Settings() {
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label>New password (min 6 characters)</Label>
-              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" minLength={6} />
+              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="********" minLength={6} />
             </div>
           </div>
           <DialogFooter>

@@ -13,6 +13,7 @@ import dashboardRouter from "./api/dashboard.js";
 import medicineMasterRouter from "./api/medicine-master.js";
 import { requireAuth } from "./middleware/auth.js";
 import { prisma } from "./lib/prisma.js";
+import { getTwoFactorEnabledForUser, setTwoFactorEnabledForUser } from "./lib/user-security.js";
 
 export async function registerRoutes(_httpServer: Server, app: Express): Promise<Server> {
   // Public auth routes
@@ -28,7 +29,8 @@ export async function registerRoutes(_httpServer: Server, app: Express): Promise
         select: { id: true, name: true, email: true, role: true, createdAt: true },
       });
       if (!user) return res.status(404).json({ message: "User not found" });
-      return res.json(user);
+      const twoFactorEnabled = await getTwoFactorEnabledForUser(user.id);
+      return res.json({ ...user, twoFactorEnabled });
     } catch (e) {
       console.error("Me error:", e);
       return res.status(500).json({ message: "Failed to fetch user" });
@@ -39,18 +41,40 @@ export async function registerRoutes(_httpServer: Server, app: Express): Promise
     try {
       const userId = (req as import("./middleware/auth.js").AuthRequest).user?.userId;
       if (!userId) return res.status(401).json({ message: "Unauthorized" });
-      const body = req.body as { name?: string; password?: string };
+      const body = req.body as { name?: string; password?: string; twoFactorEnabled?: boolean };
       const { hashPassword } = await import("./lib/auth.js");
       const data: { name?: string; password?: string } = {};
+      let shouldUpdateTwoFactor = false;
+      let nextTwoFactorEnabled = false;
+      if (typeof body.twoFactorEnabled === "boolean") {
+        shouldUpdateTwoFactor = true;
+        nextTwoFactorEnabled = body.twoFactorEnabled;
+      }
       if (typeof body.name === "string" && body.name.trim()) data.name = body.name.trim();
       if (typeof body.password === "string" && body.password.length >= 6) data.password = await hashPassword(body.password);
-      if (Object.keys(data).length === 0) return res.status(400).json({ message: "No valid fields to update" });
-      const user = await prisma.user.update({
+      if (Object.keys(data).length === 0 && !shouldUpdateTwoFactor) {
+        return res.status(400).json({ message: "No valid fields to update" });
+      }
+
+      let user = await prisma.user.findUnique({
         where: { id: userId },
-        data,
         select: { id: true, name: true, email: true, role: true, createdAt: true },
       });
-      return res.json(user);
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      if (Object.keys(data).length > 0) {
+        user = await prisma.user.update({
+          where: { id: userId },
+          data,
+          select: { id: true, name: true, email: true, role: true, createdAt: true },
+        });
+      }
+
+      if (shouldUpdateTwoFactor) {
+        await setTwoFactorEnabledForUser(userId, nextTwoFactorEnabled);
+      }
+      const twoFactorEnabled = await getTwoFactorEnabledForUser(userId);
+      return res.json({ ...user, twoFactorEnabled });
     } catch (e) {
       console.error("Me update error:", e);
       return res.status(500).json({ message: "Failed to update profile" });

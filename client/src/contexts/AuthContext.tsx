@@ -7,13 +7,20 @@ export type User = {
   email: string;
   role: "ADMIN" | "STAFF";
   createdAt: string;
+  twoFactorEnabled: boolean;
 };
+
+export type LoginResult =
+  | { twoFactorRequired: false }
+  | { twoFactorRequired: true; challengeToken: string; provider: "supabase"; message?: string };
 
 type AuthContextValue = {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<LoginResult>;
+  verifyLoginOtp: (challengeToken: string, otp: string) => Promise<void>;
+  resendLoginOtp: (challengeToken: string) => Promise<void>;
   register: (name: string, email: string, password: string, role?: "ADMIN" | "STAFF") => Promise<void>;
   logout: () => void;
   setAuth: (user: User, token: string) => void;
@@ -61,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(u);
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string): Promise<LoginResult> => {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -72,9 +79,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const err = await res.json().catch(() => ({}));
       throw new Error((err as { message?: string }).message || "Login failed");
     }
+
+    const data = await res.json() as
+      | { twoFactorRequired: false; user: User; token: string }
+      | { twoFactorRequired: true; challengeToken: string; provider: "supabase"; message?: string };
+
+    if (data.twoFactorRequired) {
+      return {
+        twoFactorRequired: true,
+        challengeToken: data.challengeToken,
+        provider: data.provider,
+        message: data.message,
+      };
+    }
+
+    setAuth(data.user, data.token);
+    return { twoFactorRequired: false };
+  }, [setAuth]);
+
+  const verifyLoginOtp = useCallback(async (challengeToken: string, otp: string) => {
+    const res = await fetch("/api/auth/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ challengeToken, otp }),
+      credentials: "include",
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error((err as { message?: string }).message || "OTP verification failed");
+    }
     const data = await res.json() as { user: User; token: string };
     setAuth(data.user, data.token);
   }, [setAuth]);
+
+  const resendLoginOtp = useCallback(async (challengeToken: string) => {
+    const res = await fetch("/api/auth/resend-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ challengeToken }),
+      credentials: "include",
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error((err as { message?: string }).message || "Failed to resend OTP");
+    }
+  }, []);
 
   const register = useCallback(
     async (name: string, email: string, password: string, role: "ADMIN" | "STAFF" = "STAFF") => {
@@ -95,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, setAuth }}>
+    <AuthContext.Provider value={{ user, token, loading, login, verifyLoginOtp, resendLoginOtp, register, logout, setAuth }}>
       {children}
     </AuthContext.Provider>
   );

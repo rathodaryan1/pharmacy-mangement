@@ -13,17 +13,25 @@ datasource db {
 
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      UserRole @default(STAFF)
-  createdAt DateTime @default(now())
+  id              String              @id @default(cuid())
+  name            String
+  email           String              @unique
+  password        String
+  role            UserRole            @default(STAFF)
+  createdAt       DateTime            @default(now())
+  securitySetting UserSecuritySetting?
 }
 
 enum UserRole {
   ADMIN
   STAFF
+}
+
+model UserSecuritySetting {
+  userId           String   @id
+  twoFactorEnabled Boolean  @default(false)
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Product {

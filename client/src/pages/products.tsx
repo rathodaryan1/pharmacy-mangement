@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const categories = ["All", "Antibiotics", "Pain Relievers", "Blood Pressure", "Antacids", "Vitamins", "First Aid", "Uncategorized"];
 
@@ -149,7 +150,7 @@ export default function Products() {
           <Button variant="outline" className="rounded-xl flex-1 sm:flex-none shadow-sm border-border/50" onClick={() => toast({ title: "Export", description: "Export uses Reports -> CSV/PDF" })}>
             <Download className="w-4 h-4 mr-2" /> Export
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl shadow-lg shadow-primary/25 flex-1 sm:flex-none" onClick={() => setAddOpen(true)}>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-lg shadow-primary/25 flex-1 sm:flex-none" onClick={() => setAddOpen(true)}>
             <Plus className="w-4 h-4 mr-2" /> Add Product
           </Button>
         </div>
@@ -183,23 +184,24 @@ export default function Products() {
         <h3 className="text-lg font-semibold mb-4">Categories</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {categories.map((cat, i) => (
-            <button
+            <Button
               type="button"
               key={i}
-              className={`bg-card border rounded-2xl p-4 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all group ${
-                selectedCategory === cat ? "border-primary shadow-md" : "border-border/50"
+              variant="ghost"
+              className={`h-auto flex-col rounded-2xl border bg-card p-4 text-center transition-all group ${
+                selectedCategory === cat ? "border-primary shadow-md" : "border-border/50 hover:border-primary hover:shadow-md"
               }`}
               onClick={() => {
                 setSelectedCategory(cat);
                 setPage(1);
               }}
             >
-              <div className="w-12 h-12 mx-auto bg-secondary group-hover:bg-primary/10 rounded-full flex items-center justify-center mb-3 transition-colors">
-                <Package className="w-5 h-5 text-sidebar-background group-hover:text-primary" />
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-secondary transition-colors group-hover:bg-primary/10">
+                <Package className="h-5 w-5 text-sidebar-background group-hover:text-primary" />
               </div>
-              <p className="font-medium text-sm text-foreground">{cat}</p>
-              <p className="text-xs text-muted-foreground mt-1">{categoryMeta?.counts?.[cat] ?? 0} items</p>
-            </button>
+              <p className="text-sm font-medium text-foreground">{cat}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{categoryMeta?.counts?.[cat] ?? 0} items</p>
+            </Button>
           ))}
         </div>
       </div>
@@ -235,10 +237,12 @@ export default function Products() {
             </div>
             <div className="flex flex-wrap gap-2">
               {(medicineMasterSearchData ?? []).slice(0, 10).map((item) => (
-                <button
+                <Button
                   key={item.id}
                   type="button"
-                  className="px-2.5 py-1.5 text-xs rounded-lg border border-border bg-background hover:border-primary hover:text-primary"
+                  variant="outline"
+                  size="sm"
+                  className="h-auto rounded-lg border-border bg-background px-2.5 py-1.5 text-xs hover:border-primary hover:text-primary"
                   title={item.name}
                   onClick={() => {
                     setSearch(item.name);
@@ -246,7 +250,7 @@ export default function Products() {
                   }}
                 >
                   {item.name}
-                </button>
+                </Button>
               ))}
               {!medicineMasterSearching && (medicineMasterSearchData?.length ?? 0) === 0 && (
                 <span className="text-xs text-muted-foreground">No medicine match</span>
@@ -255,70 +259,70 @@ export default function Products() {
           </div>
         )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-muted-foreground uppercase bg-background">
-              <tr>
-                <th className="px-6 py-4 font-medium">Product Name</th>
-                <th className="px-6 py-4 font-medium">Category</th>
-                <th className="px-6 py-4 font-medium">Batch</th>
-                <th className="px-6 py-4 font-medium">Price</th>
-                <th className="px-6 py-4 font-medium">Stock</th>
-                <th className="px-6 py-4 font-medium">Expiry Date</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50 bg-white">
-              {listLoading ? (
-                <tr><td colSpan={8} className="px-6 py-8"><Skeleton className="h-8 w-full" /></td></tr>
-              ) : (
-                productsList.map((product: ProductRow) => (
-                  <tr key={product.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-semibold text-foreground">{product.name}</div>
-                      <div className="text-xs text-muted-foreground">{product.id}</div>
-                    </td>
-                    <td className="px-6 py-4 text-muted-foreground">{product.category}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{product.batchNumber}</td>
-                    <td className="px-6 py-4 font-medium">Rs {Number(product.sellingPrice).toFixed(2)}</td>
-                    <td className="px-6 py-4">
-                      <span className="font-semibold">{product.stock}</span> pcs
-                    </td>
-                    <td className="px-6 py-4 text-muted-foreground">{product.expiryDate}</td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className={`
-                        border-0 capitalize
-                        ${product.status === "in stock" ? "bg-emerald-100 text-emerald-700" : ""}
-                        ${product.status === "low stock" ? "bg-amber-100 text-amber-700" : ""}
-                        ${product.status === "out of stock" ? "bg-red-100 text-red-700" : ""}
-                      `}>
-                        {product.status}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="rounded-lg h-8 w-8 hover:bg-secondary">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-xl shadow-lg border-border/50">
-                          <DropdownMenuItem className="cursor-pointer rounded-md" onClick={() => { setEditingId(product.id); setForm({ name: product.name, batchNumber: product.batchNumber, stock: product.stock, purchasePrice: product.purchasePrice, sellingPrice: product.sellingPrice, expiryDate: product.expiryDate }); }}>
-                            <Edit className="w-4 h-4 mr-2"/> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer rounded-md text-red-600 focus:text-red-600 focus:bg-red-50" onClick={() => deleteMutation.mutate(product.id)}>
-                            <Trash2 className="w-4 h-4 mr-2"/> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader className="bg-background">
+            <TableRow>
+              <TableHead className="font-medium">Product Name</TableHead>
+              <TableHead className="font-medium">Category</TableHead>
+              <TableHead className="font-medium">Batch</TableHead>
+              <TableHead className="font-medium">Price</TableHead>
+              <TableHead className="font-medium">Stock</TableHead>
+              <TableHead className="font-medium">Expiry Date</TableHead>
+              <TableHead className="font-medium">Status</TableHead>
+              <TableHead className="text-right font-medium">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {listLoading ? (
+              <TableRow>
+                <TableCell colSpan={8} className="py-8"><Skeleton className="h-8 w-full" /></TableCell>
+              </TableRow>
+            ) : (
+              productsList.map((product: ProductRow) => (
+                <TableRow key={product.id} className="hover:bg-muted/20">
+                  <TableCell>
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">{product.name}</div>
+                    <div className="text-xs text-muted-foreground">{product.id}</div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{product.category}</TableCell>
+                  <TableCell className="text-muted-foreground">{product.batchNumber}</TableCell>
+                  <TableCell className="font-medium">Rs {Number(product.sellingPrice).toFixed(2)}</TableCell>
+                  <TableCell>
+                    <span className="font-semibold">{product.stock}</span> pcs
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{product.expiryDate}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={`
+                      border-0 capitalize
+                      ${product.status === "in stock" ? "bg-emerald-100 text-emerald-700" : ""}
+                      ${product.status === "low stock" ? "bg-amber-100 text-amber-700" : ""}
+                      ${product.status === "out of stock" ? "bg-red-100 text-red-700" : ""}
+                    `}>
+                      {product.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-secondary">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="rounded-xl border-border/50 shadow-lg">
+                        <DropdownMenuItem className="cursor-pointer rounded-md" onClick={() => { setEditingId(product.id); setForm({ name: product.name, batchNumber: product.batchNumber, stock: product.stock, purchasePrice: product.purchasePrice, sellingPrice: product.sellingPrice, expiryDate: product.expiryDate }); }}>
+                          <Edit className="mr-2 h-4 w-4"/> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer rounded-md text-red-600 focus:bg-red-50 focus:text-red-600" onClick={() => deleteMutation.mutate(product.id)}>
+                          <Trash2 className="mr-2 h-4 w-4"/> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
 
         <div className="p-4 border-t border-border/50 flex items-center justify-between text-sm text-muted-foreground">
           <div>Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, total)} of {total} entries</div>
@@ -345,15 +349,17 @@ export default function Products() {
                     </div>
                     <div className="space-y-1 max-h-32 overflow-auto">
                       {(medicineMasterAddData ?? []).slice(0, 10).map((item) => (
-                        <button
+                        <Button
                           key={item.id}
                           type="button"
-                          className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-background border border-transparent hover:border-primary/40"
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto w-full justify-start rounded border border-transparent px-2 py-1.5 text-left text-xs hover:border-primary/40 hover:bg-background"
                           title={item.name}
                           onClick={() => setForm((f) => ({ ...f, name: item.name }))}
                         >
                           {item.name}
-                        </button>
+                        </Button>
                       ))}
                       {!medicineMasterAddLoading && (medicineMasterAddData?.length ?? 0) === 0 && (
                         <div className="text-xs text-muted-foreground px-2 py-1">No medicine match</div>
