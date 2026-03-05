@@ -5,14 +5,14 @@
   "framework": null,
   "builds": [
     {
-      "src": "dist/index.cjs",
+      "src": "server/index.ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/dist/index.cjs"
+      "dest": "/server/index.ts"
     }
   ]
 }
