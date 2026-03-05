@@ -3,11 +3,12 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "framework": null,
-  "functions": {
-    "dist/index.cjs": {
-      "runtime": "@vercel/node"
+  "builds": [
+    {
+      "src": "dist/index.cjs",
+      "use": "@vercel/node"
     }
-  },
+  ],
   "routes": [
     {
       "src": "/(.*)",
