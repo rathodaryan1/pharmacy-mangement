@@ -1,15 +1,28 @@
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import type { UserRole } from "@prisma/client";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "pharmacy-jwt-secret-change-in-production";
 const SALT_ROUNDS = 10;
+let bcryptModule: { hash: (password: string, rounds: number) => Promise<string>; compare: (password: string, hash: string) => Promise<boolean> } | null = null;
+
+async function getBcrypt() {
+  if (bcryptModule) return bcryptModule;
+  const loaded = await import("bcrypt");
+  const resolved = (loaded as unknown as { default?: typeof loaded }).default ?? loaded;
+  bcryptModule = {
+    hash: resolved.hash.bind(resolved),
+    compare: resolved.compare.bind(resolved),
+  };
+  return bcryptModule;
+}
 
 export async function hashPassword(password: string): Promise<string> {
+  const bcrypt = await getBcrypt();
   return bcrypt.hash(password, SALT_ROUNDS);
 }
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  const bcrypt = await getBcrypt();
   return bcrypt.compare(password, hash);
 }
 
