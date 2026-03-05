@@ -57,7 +57,7 @@ router.get("/hybrid-search", async (req: AuthRequest, res: Response<HybridSearch
     });
 
     if (inventoryRows.length > 0) {
-      const inventoryResults: InventoryResult[] = inventoryRows.map((row) => ({
+      const inventoryResults: InventoryResult[] = inventoryRows.map((row: { id: string; name: string; batchNumber: string; sellingPrice: unknown; stock: number }) => ({
         id: row.id,
         name: row.name,
         batchNumber: row.batchNumber,

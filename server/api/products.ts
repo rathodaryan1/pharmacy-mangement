@@ -157,7 +157,7 @@ router.get("/search", async (req: AuthRequest, res: Response) => {
     });
 
     return res.json(
-      items.map((item) => ({
+      items.map((item: { id: string; name: string; batchNumber: string; sellingPrice: unknown; stock: number }) => ({
         id: item.id,
         name: item.name,
         batchNumber: item.batchNumber,

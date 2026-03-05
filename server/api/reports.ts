@@ -37,7 +37,7 @@ router.get("/sales-summary", async (req: AuthRequest, res: Response) => {
       include: { items: true },
     });
 
-    const totalRevenue = orders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
+    const totalRevenue = orders.reduce((sum: number, o: { totalAmount: unknown }) => sum + Number(o.totalAmount), 0);
     const totalOrders = orders.length;
     const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
@@ -89,7 +89,7 @@ router.get("/sales-summary/csv", async (req: AuthRequest, res: Response) => {
     });
 
     const headers = ["Order ID", "Date", "Customer", "Total Amount", "Status", "Payment"];
-    const rows = orders.map((o) =>
+    const rows = orders.map((o: { id: string; createdAt: Date; customer: { name: string }; totalAmount: unknown; orderStatus: string; paymentStatus: string }) =>
       [
         o.id,
         o.createdAt.toISOString().slice(0, 10),
@@ -125,10 +125,10 @@ router.get("/sales-summary/excel", async (req: AuthRequest, res: Response) => {
       orderBy: { createdAt: "desc" },
     });
 
-    const totalRevenue = orders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
+    const totalRevenue = orders.reduce((sum: number, o: { totalAmount: unknown }) => sum + Number(o.totalAmount), 0);
     const rows = orders
       .map(
-        (o) => `
+        (o: { id: string; createdAt: Date; customer: { name: string }; totalAmount: unknown; orderStatus: string; paymentStatus: string }) => `
       <Row>
         <Cell><Data ss:Type="String">${escapeXml(o.id)}</Data></Cell>
         <Cell><Data ss:Type="String">${o.createdAt.toISOString().slice(0, 10)}</Data></Cell>
@@ -193,7 +193,7 @@ router.get("/sales-summary/pdf", async (req: AuthRequest, res: Response) => {
       orderBy: { createdAt: "desc" },
     });
 
-    const totalRevenue = orders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
+    const totalRevenue = orders.reduce((sum: number, o: { totalAmount: unknown }) => sum + Number(o.totalAmount), 0);
     const doc = new PDFDocument({ margin: 50 });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(

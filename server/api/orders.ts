@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma.js";
 import { CreateOrderBodySchema, UpdateOrderBodySchema } from "../../shared/api-schemas.js";
 import type { AuthRequest } from "../middleware/auth.js";
 import { Decimal } from "@prisma/client/runtime/library";
+import type { Prisma } from "@prisma/client";
 import PDFDocument from "pdfkit";
 
 const router = Router();
@@ -68,11 +69,11 @@ router.get("/", async (req: AuthRequest, res: Response) => {
       }),
       prisma.order.count({ where }),
     ]);
-    const list = items.map((o) => ({
+    const list = items.map((o: { id: string; customer: { name: string }; createdAt: Date; items: { product: { name: string } }[]; payments: { method: string }[]; totalAmount: unknown; paymentStatus: string; orderStatus: string }) => ({
       id: o.id,
       customerName: o.customer.name,
       orderDate: o.createdAt.toISOString().slice(0, 10),
-      products: o.items.map((i) => i.product.name),
+      products: o.items.map((i: { product: { name: string } }) => i.product.name),
       paymentMethod: o.payments[0]?.method ?? "PENDING",
       totalAmount: Number(o.totalAmount),
       paymentStatus: o.paymentStatus,
@@ -175,7 +176,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "At least one order item is required" });
     }
 
-    const createdOrder = await prisma.$transaction(async (tx) => {
+    const createdOrder = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       let resolvedCustomerId = customerId ?? "";
       if (resolvedCustomerId) {
         const existing = await tx.customer.findUnique({ where: { id: resolvedCustomerId } });
@@ -202,15 +203,11 @@ router.post("/", async (req: AuthRequest, res: Response) => {
 
       const productIds = groupedItems.map((i) => i.productId);
       const products = await tx.product.findMany({ where: { id: { in: productIds } } });
-      const productMap = new Map(products.map((p) => [p.id, p]));
+      const productMap = new Map(products.map((p: { id: string; name: string; stock: number; sellingPrice: unknown }) => [p.id, p]));
 
       for (const it of groupedItems) {
-        if (!productMap.has(it.productId)) throw new Error(`Product ${it.productId} not found`);
-      }
-
-      let totalAmount = 0;
-      for (const it of groupedItems) {
-        const product = productMap.get(it.productId)!;
+        const product = productMap.get(it.productId);
+        if (!product) throw new Error(`Product ${it.productId} not found`);
         if (product.stock < it.quantity) {
           throw new Error(`Insufficient stock for ${product.name}. Available: ${product.stock}`);
         }
@@ -223,7 +220,8 @@ router.post("/", async (req: AuthRequest, res: Response) => {
           data: { stock: { decrement: it.quantity } },
         });
         if (updated.count === 0) {
-          const product = productMap.get(it.productId)!;
+          const product = productMap.get(it.productId);
+          if (!product) throw new Error(`Product ${it.productId} not found`);
           throw new Error(`Stock changed for ${product.name}. Please retry`);
         }
       }
@@ -236,11 +234,15 @@ router.post("/", async (req: AuthRequest, res: Response) => {
           paymentStatus: computedPaymentStatus,
           orderStatus: "PENDING",
           items: {
-            create: groupedItems.map((it) => ({
-              productId: it.productId,
-              quantity: it.quantity,
-              price: new Decimal(Number(productMap.get(it.productId)!.sellingPrice)),
-            })),
+            create: groupedItems.map((it) => {
+              const product = productMap.get(it.productId);
+              if (!product) throw new Error(`Product ${it.productId} not found`);
+              return {
+                productId: it.productId,
+                quantity: it.quantity,
+                price: new Decimal(Number(product.sellingPrice)),
+              };
+            }),
           },
         },
       });
@@ -294,7 +296,7 @@ router.put("/:id", async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "No updatable fields provided" });
     }
 
-    const order = await prisma.$transaction(async (tx) => {
+    const order = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const updated = await tx.order.update({
         where: { id: String(req.params.id ?? "") },
         data,

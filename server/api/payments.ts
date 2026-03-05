@@ -19,7 +19,7 @@ router.get("/", async (req: AuthRequest, res: Response) => {
       }),
       prisma.payment.count(),
     ]);
-    const list = items.map((p) => ({
+    const list = items.map((p: { id: string; orderId: string; order: { customer: { name: string } }; createdAt: Date; amount: unknown; method: string; status: string }) => ({
       id: p.id,
       transactionId: p.id,
       orderId: p.orderId,

@@ -13,7 +13,7 @@ const router = Router();
 async function searchBySimilarity(query: string): Promise<MedicineMasterSearchItem[]> {
   // pg_trgm fallback for typo-tolerant search when "contains" has no matches.
   try {
-    const rows = await prisma.$queryRaw<MedicineMasterSearchItem[]>(Prisma.sql`
+    const rows = await prisma.$queryRaw<MedicineMasterSearchItem[]>(prisma.sql`
       SELECT id, name
       FROM "MedicineMaster"
       WHERE similarity(name, ${query}) > 0.25

@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma.js";
 import { CreatePurchaseOrderBodySchema, UpdatePurchaseOrderBodySchema } from "../../shared/api-schemas.js";
 import type { AuthRequest } from "../middleware/auth.js";
 import { Decimal } from "@prisma/client/runtime/library";
+import type { Prisma } from "@prisma/client";
 
 const router = Router();
 
@@ -20,7 +21,7 @@ router.get("/", async (req: AuthRequest, res: Response) => {
       }),
       prisma.purchaseOrder.count(),
     ]);
-    const list = items.map((po) => {
+    const list = items.map((po: { id: string; supplierId: string; supplier: { name: string }; totalAmount: unknown; status: string; createdAt: Date; items: { id: string; productId: string; quantity: number; cost: unknown; product: { name: string } }[] }) => {
       const withR = po as typeof po & { supplier: { name: string }; items: { id: string; productId: string; quantity: number; cost: unknown; product: { name: string } }[] };
       return {
       id: withR.id,
@@ -29,7 +30,7 @@ router.get("/", async (req: AuthRequest, res: Response) => {
       totalAmount: Number(withR.totalAmount),
       status: withR.status,
       createdAt: withR.createdAt.toISOString(),
-      items: withR.items.map((i) => ({
+      items: withR.items.map((i: { id: string; productId: string; quantity: number; cost: unknown; product: { name: string } }) => ({
         id: i.id,
         productId: i.productId,
         productName: i.product.name,
@@ -61,7 +62,7 @@ router.get("/:id", async (req: AuthRequest, res: Response) => {
       totalAmount: Number(withR.totalAmount),
       status: withR.status,
       createdAt: withR.createdAt.toISOString(),
-      items: withR.items.map((i) => ({
+      items: withR.items.map((i: { id: string; productId: string; quantity: number; cost: unknown; product: { name: string } }) => ({
         id: i.id,
         productId: i.productId,
         productName: i.product.name,
@@ -112,7 +113,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
       totalAmount: Number(po.totalAmount),
       status: po.status,
       createdAt: po.createdAt.toISOString(),
-      items: po.items.map((i) => ({
+      items: po.items.map((i: { id: string; productId: string; quantity: number; cost: unknown; product: { name: string } }) => ({
         id: i.id,
         productId: i.productId,
         productName: i.product.name,
@@ -137,7 +138,7 @@ router.put("/:id/receive", async (req: AuthRequest, res: Response) => {
     if (po.status === "RECEIVED") {
       return res.status(400).json({ message: "Purchase order already received" });
     }
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       for (const item of po.items) {
         await tx.product.update({
           where: { id: item.productId },
@@ -161,7 +162,7 @@ router.put("/:id/receive", async (req: AuthRequest, res: Response) => {
       totalAmount: Number(u!.totalAmount),
       status: u!.status,
       createdAt: u!.createdAt.toISOString(),
-      items: u!.items.map((i) => ({
+      items: u!.items.map((i: { id: string; productId: string; quantity: number; cost: unknown; product: { name: string } }) => ({
         id: i.id,
         productId: i.productId,
         productName: i.product.name,
@@ -195,7 +196,7 @@ router.put("/:id", async (req: AuthRequest, res: Response) => {
       totalAmount: Number(withR.totalAmount),
       status: withR.status,
       createdAt: withR.createdAt.toISOString(),
-      items: withR.items.map((i) => ({
+      items: withR.items.map((i: { id: string; productId: string; quantity: number; cost: unknown; product: { name: string } }) => ({
         id: i.id,
         productId: i.productId,
         productName: i.product.name,

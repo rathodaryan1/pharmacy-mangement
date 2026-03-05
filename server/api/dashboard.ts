@@ -94,11 +94,11 @@ router.get("/recent-orders", async (req: AuthRequest, res: Response) => {
       include: { customer: true, items: { include: { product: true } } },
     });
     return res.json({
-      items: orders.map((o) => ({
+      items: orders.map((o: { id: string; customer: { name: string }; createdAt: Date; items: { product: { name: string } }[]; totalAmount: unknown; paymentStatus: string; orderStatus: string }) => ({
         id: o.id,
         customerName: o.customer.name,
         orderDate: o.createdAt.toISOString().slice(0, 10),
-        products: o.items.map((i) => i.product.name),
+        products: o.items.map((i: { product: { name: string } }) => i.product.name),
         totalAmount: Number(o.totalAmount),
         paymentStatus: o.paymentStatus,
         orderStatus: o.orderStatus,
