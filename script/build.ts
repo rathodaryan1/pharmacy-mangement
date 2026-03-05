@@ -59,7 +59,13 @@ async function buildAll() {
       "process.env.NODE_ENV": '"production"',
     },
     minify: true,
-    external: externals,
+    external: [
+      ...externals,
+      "@mapbox/node-pre-gyp",
+      "mock-aws-s3",
+      "aws-sdk",
+      "nock",
+    ],
     logLevel: "info",
   });
 }
