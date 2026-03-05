@@ -15,11 +15,5 @@
       "src": "/(.*)",
       "dest": "/dist/index.cjs"
     }
-  ],
-  "functions": {
-    "dist/index.cjs": {
-      "runtime": "nodejs18.x",
-      "maxDuration": 30
-    }
-  }
+  ]
 }
