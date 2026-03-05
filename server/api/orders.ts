@@ -204,6 +204,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
       const productIds = groupedItems.map((i) => i.productId);
       const products = await tx.product.findMany({ where: { id: { in: productIds } } });
       const productMap = new Map(products.map((p: { id: string; name: string; stock: number; sellingPrice: unknown }) => [p.id, p]));
+      let totalAmount = 0;
 
       for (const it of groupedItems) {
         const product = productMap.get(it.productId);

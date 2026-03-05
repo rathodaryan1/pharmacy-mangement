@@ -50,7 +50,7 @@ router.get("/", async (req: AuthRequest, res: Response) => {
       prisma.customer.count({ where }),
     ]);
     const withStats = await Promise.all(
-      items.map(async (c: { id: string; name: string; email: string; phone: string; address: string; createdAt: Date }) => {
+      items.map(async (c) => {
         const [ordersCount, lastOrder, ordersSum] = await Promise.all([
           prisma.order.count({ where: { customerId: c.id } }),
           prisma.order.findFirst({ where: { customerId: c.id }, orderBy: { createdAt: "desc" }, select: { createdAt: true } }),
